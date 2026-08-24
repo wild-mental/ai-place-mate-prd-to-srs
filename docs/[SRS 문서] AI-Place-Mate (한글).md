@@ -31,6 +31,19 @@
 
 확장은 **PRD가 이미 정한 내용에 한정**한다. PRD에 없는 항목은 신설하지 않으며, 양식상 필요하나 PRD가 정하지 않은 값은 `미정`으로 표기한다.
 
+### 이 문서의 그림을 읽는 법
+
+요구사항을 글로만 읽으면 관계가 보이지 않으므로, 각 장에 그림을 함께 두었다. **배경지식이 없어도 아래 네 줄만 알면 전부 읽을 수 있다.**
+
+| 그림 | 답하는 질문 | 읽는 법 | 위치 |
+| --- | --- | --- | --- |
+| 컨텍스트 · 컴포넌트 | 시스템의 **경계와 내부 구획**은 어떻게 되나 | 상자는 구성 요소, 화살표는 호출 방향. 점선은 보조 경로 | §3 |
+| 유스케이스 | **누가 무엇을 할 수 있나** | 둥근 것이 행위자, 모난 것이 할 수 있는 일 | §4 |
+| ERD · 상태 다이어그램 | 데이터가 **어떤 모양으로 저장되고 어떤 상태를 거치나** | ERD의 `\|\|`=1개 · `o{`=0개 이상. 상태도는 검은 점에서 시작 | §6.2 |
+| 시퀀스 · 플로차트 | 요청 하나가 **어떤 순서로 처리되고 어디서 갈리나** | 시퀀스는 위→아래가 시간, 플로차트는 마름모가 판단 지점 | §9 · §10 · §14 |
+
+**전체 설계 도면은 별도 문서에 있다** — 클래스 다이어그램 6종, 시퀀스 10종, 플로차트 6종, 상태 다이어그램 4종을 포함한 32개 도면은 `[설계 문서] AI-Place-Mate (한글).md` (SDD-AIPLACE-MVP-001)를 참조한다. 본 문서에는 요구사항을 이해하는 데 직접 필요한 8개만 배치했다.
+
 ---
 
 ## 1. 서론
@@ -110,6 +123,44 @@
 
 ## 3. 시스템 맥락 및 인터페이스
 
+### 3.1 시스템 경계
+
+**이 그림이 말하는 것:** 가운데 점선 안이 우리가 만드는 것이고, 바깥은 만들지 않고 **연결만** 하는 것이다. 결제와 지도는 직접 만들지 않는다.
+
+```mermaid
+flowchart TB
+    subgraph users["사람"]
+        U1["이용자<br/>C1 · C2 · C3 · C4"]
+        U2["매장 사장<br/>P5"]
+        U3["서비스 운영자"]
+    end
+
+    subgraph sys["AI-Place-Mate (우리가 만드는 것)"]
+        CORE["조건 검색 · 근거 표기 · Top-3 반환<br/>에이전트 제안 · 예약 · 선결제"]
+    end
+
+    subgraph ext["외부 시스템 (연결만 함)"]
+        E1["PG<br/>결제 · 환불"]
+        E2["네이버 지도 플랫폼<br/>탭 노출 · 유입"]
+        E3["지도 · 경로 API<br/>v0.1 미사용"]
+        E4["실시간 매장 상태<br/>제휴 검토"]
+    end
+
+    U1 -->|"조건 입력 · 후보 선택"| CORE
+    U2 -->|"프로필 등록 · 제안 발신"| CORE
+    U3 -->|"제안 심사 · 재확인 처리"| CORE
+    CORE -->|"근거 붙은 Top-3"| U1
+    CORE -->|"소환 알림"| U2
+    CORE <-->|"결제 · 환불 · 정산"| E1
+    CORE <-->|"탭 진입"| E2
+    CORE -.->|"v0.2 도입 예정"| E3
+    CORE -.->|"단가 조건 충족 시"| E4
+
+    style sys stroke-dasharray: 6 4
+```
+
+### 3.2 구성 요소
+
 - **클라이언트 애플리케이션**
     1. 네이버 지도 내 별도 탭 (1차 유통 형태)
     2. 독립 모바일 웹 `https://m.aiplace.example.com` (병행 경로)
@@ -129,9 +180,138 @@
     - 지도·경로 API — **v0.1 미사용**, v0.2에서 접근성 가중치와 함께 도입
     - 실시간 매장 상태 공급 사업자 — 제휴 검토 단계
 
+### 3.3 서비스 간 호출 관계
+
+**이 그림이 말하는 것:** 8개 서비스 중 **Index Service가 맨 아래**에 있다. 나머지 일곱 개가 그 위에 얹히므로, 색인 스키마가 확정되지 않으면 아무것도 착수할 수 없다(§14.1의 병목).
+
+```mermaid
+flowchart TB
+    subgraph client["클라이언트"]
+        C1["네이버 지도 탭<br/>1차 유통"]
+        C2["독립 모바일 웹<br/>병행 경로"]
+        C3["매장 에이전트 콘솔<br/>Phase 2"]
+    end
+
+    GW["API Gateway<br/>LatencyBudgetMonitor<br/>REQ-NF-001 · 003"]
+
+    subgraph app["애플리케이션 서비스"]
+        QS["Query Service<br/>파싱 · 필터 · 폴백<br/>REQ-FUNC-002 · 003 · 004"]
+        RS["Ranking Service<br/>Top-3 선정<br/>REQ-FUNC-006"]
+        ES["Evidence Service<br/>근거 · 공유 카드<br/>REQ-FUNC-005"]
+        ARS["Agent Room Service<br/>소환 · 제안 수집<br/>REQ-FUNC-009"]
+        MCS["Merchant Console Service<br/>프로필 · 수용 조건<br/>REQ-FUNC-008"]
+        RPS["Reservation & Payment<br/>승계 · 결제 · 노쇼<br/>REQ-FUNC-007"]
+    end
+
+    subgraph data["데이터 계층"]
+        IS["Index Service<br/>dish + attribute 색인<br/>REQ-FUNC-001 · 010"]
+        CACHE["Attribute Cache<br/>히트율 ≥ 70%<br/>REQ-NF-013"]
+        DB[("주 데이터베이스")]
+    end
+
+    AS["Analytics Service<br/>이벤트 수집 · 집계 · 알림<br/>REQ-NF-015"]
+    PG(["PG"])
+
+    C1 --> GW
+    C2 --> GW
+    C3 --> GW
+    GW --> QS
+    GW --> ES
+    GW --> ARS
+    GW --> MCS
+    GW --> RPS
+    QS --> IS
+    RS --> QS
+    RS --> ES
+    QS --> RS
+    ES --> IS
+    ARS --> IS
+    ARS --> MCS
+    ARS --> ES
+    RPS --> ARS
+    RPS --> PG
+    MCS --> IS
+    IS --> CACHE
+    IS --> DB
+    C1 -.->|"이벤트"| AS
+    QS -.->|"이벤트"| AS
+    ES -.->|"이벤트"| AS
+    ARS -.->|"이벤트"| AS
+    RPS -.->|"이벤트"| AS
+    IS -.->|"신선도 · 커버리지"| AS
+```
+
+점선은 계측 경로다 — 기능 호출이 아니라 이벤트 적재이며, 실패해도 사용자 요청을 막지 않는다(§10.2).
+
 ---
 
 ## 4. 구체적 요구사항
+
+### 4.0 요구사항 지도 — 누가 무엇을 할 수 있는가
+
+아래 표들은 요구사항을 하나씩 정의한다. 그 전에 **전체가 어떻게 맞물리는지** 한 장으로 본다.
+
+**이 그림이 말하는 것:** 둥근 것이 행위자(사람 또는 시스템), 모난 것이 그 행위자가 할 수 있는 일이다. 점선 `«include»` 는 "그 일을 하면 반드시 이것도 일어난다", `«extend»` 는 "특정 조건에서만 일어난다"는 뜻이다.
+
+```mermaid
+flowchart LR
+    A1(["이용자"])
+    A2(["매장 사장"])
+    A3(["서비스 운영자"])
+    A4(["PG"])
+    A5(["시각 스케줄러"])
+
+    subgraph SYS["AI-Place-Mate"]
+        UC01("UC-01 조건으로 장소 찾기")
+        UC02("UC-02 메뉴명으로 장소 찾기")
+        UC03("UC-03 예산 상한으로 후보 걸러내기")
+        UC04("UC-04 후보의 근거 확인하기")
+        UC05("UC-05 결정을 공유 카드로 내보내기")
+        UC06("UC-06 방문 후 실제 결제액 알려주기")
+        UC07("UC-07 조건 불일치 신고하기")
+        UC08("UC-08 에이전트 소환해 제안 받기")
+        UC09("UC-09 제안 골라 예약·결제하기")
+        UC10("UC-10 예약 취소·환불하기")
+        UC11("UC-11 매장 프로필 등록·갱신하기")
+        UC12("UC-12 소환 받아 제안 보내기")
+        UC13("UC-13 제안 품질 심사하기")
+        UC14("UC-14 재확인 큐 처리하기")
+        UC15("UC-15 노쇼 판정·정산하기")
+
+        UCI1("근거 4항목 검증")
+        UCI2("계측 이벤트 적재")
+        UCI3("폴백 결과 반환")
+    end
+
+    A1 --- UC01
+    A1 --- UC02
+    A1 --- UC03
+    A1 --- UC04
+    A1 --- UC05
+    A1 --- UC06
+    A1 --- UC07
+    A1 --- UC08
+    A1 --- UC09
+    A1 --- UC10
+    A2 --- UC11
+    A2 --- UC12
+    A3 --- UC13
+    A3 --- UC14
+    A4 --- UC09
+    A4 --- UC10
+    A5 --- UC15
+
+    UC01 -.->|"«include»"| UCI1
+    UC02 -.->|"«include»"| UCI1
+    UC03 -.->|"«include»"| UCI1
+    UC01 -.->|"«include»"| UCI2
+    UC09 -.->|"«include»"| UCI2
+    UC01 -.->|"«extend» 실패 시"| UCI3
+    UC02 -.->|"«extend» 결과 0건"| UCI3
+    UC08 -.->|"«extend» 제안 0건"| UCI3
+```
+
+**행위자 `시각 스케줄러`가 사람이 아닌 이유** — 노쇼 판정은 사용자 행동이 아니라 **예약 시각 경과**라는 시간 조건으로 시작된다(§9.4 AC4). 유스케이스별 상세 명세는 SDD §2.2에 있다.
 
 ### 4.1 기능 요구사항
 
@@ -270,6 +450,33 @@ erDiagram
     }
 ```
 
+**Verification의 상태 변화**
+
+**이 그림이 말하는 것:** 속성의 확인 상태가 시간에 따라 어떻게 바뀌는지다. `STALE`(경고만 띄움)과 `NEEDS_REVERIFY`(사람이 처리해야 함)를 나눈 것이 핵심이다 — 둘을 합치면 90일 경과 속성 전부가 운영자 큐로 쏟아진다.
+
+```mermaid
+stateDiagram-v2
+    [*] --> VERIFIED : 속성 등록 · 확인 주체 기록
+    VERIFIED --> STALE : verified_at 이후 90일 경과
+    STALE --> VERIFIED : 재확인 완료
+    VERIFIED --> NEEDS_REVERIFY : 이용자 불일치 신고
+    STALE --> NEEDS_REVERIFY : 이용자 불일치 신고
+    NEEDS_REVERIFY --> VERIFIED : 운영자 확인 처리
+    NEEDS_REVERIFY --> RETIRED : 사실이 아님으로 확정
+    RETIRED --> [*]
+
+    note right of STALE
+        노출은 계속되지만
+        '확인 90일 경과' 경고 병기
+        US-3 AC2 · 경고 누락률 0%
+    end note
+    note right of NEEDS_REVERIFY
+        REVERIFY_TASK 생성
+        신고 후 60초 내 전환
+        US-3 AC4
+    end note
+```
+
 **주요 필드 규칙**
 
 | 엔터티 | 필수 필드 | 제약 |
@@ -383,6 +590,66 @@ events                     -- 이벤트 로그 (파티셔닝, KPI 측정 창구)
 
 각 수용 기준은 **정상 흐름**과 **실패 흐름**으로 구분한다. 모든 사용자 스토리는 실패 흐름을 **2건 이상** 보유한다.
 
+### 9.0 가장 중요한 흐름 — 조건 입력에서 Top-3까지
+
+아래 수용 기준의 절반이 이 하나의 흐름 위에서 판정된다. **1,000ms 예산을 구간별로 어떻게 쪼개 쓰는지**가 이 그림의 핵심이다.
+
+**이 그림이 말하는 것:** 위에서 아래로 시간이 흐른다. 세로선은 참여자, 실선은 요청, 점선은 응답이다. `par` 는 동시 실행, `alt` 는 분기다.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as 이용자
+    participant GW as API Gateway
+    participant QS as Query Service
+    participant IS as Index Service
+    participant CA as Attribute Cache
+    participant ES as Evidence Service
+    participant RS as Ranking Service
+    participant AN as Analytics
+
+    U->>GW: POST /v1/query (조건 · 지역 · 인원)
+    GW->>AN: query_committed
+    GW->>QS: resolve(QueryRequest)
+    Note over QS: 파싱 예산 ≤ 150ms
+    QS->>QS: NaturalConditionParser.parse()
+    QS->>IS: queryByAttribute(조건)
+    IS->>CA: get(속성 키)
+    alt 캐시 히트 (목표 ≥ 70%)
+        CA-->>IS: Attribute
+    else 캐시 미스
+        IS->>IS: DB 조회 후 캐시 적재
+    end
+    Note over IS: 색인 조회 예산 ≤ 400ms
+    IS-->>QS: CandidateSet
+    QS->>QS: PricePlanFilter.filterByBudget()
+    QS-->>RS: 필터된 CandidateSet
+    par 후보별 근거 조립
+        RS->>ES: compose(후보 1)
+        RS->>ES: compose(후보 2)
+        RS->>ES: compose(후보 N)
+    end
+    ES->>ES: VerificationChecker.check() — 4항목 검증
+    ES-->>RS: EvidenceBlock 목록
+    RS->>RS: excludeWithoutEvidence() — 근거 미충족 배제
+    RS->>RS: TopThreeSelector.select() — 정확히 3개
+    RS->>RS: ComparisonAxisBuilder.buildAxes()
+    Note over RS: 근거 · 랭킹 예산 ≤ 300ms
+    RS-->>GW: TopThree + 비교 축
+    GW->>AN: top3_rendered (latency_ms)
+    GW-->>U: 근거 붙은 Top-3
+    Note over U,AN: 총 예산 p95 ≤ 1,000ms (REQ-NF-001)
+```
+
+**여기서 갈리는 두 지점**
+
+| 지점 | 정상 | 실패 시 | 수용 기준 |
+| --- | --- | --- | --- |
+| 조건 파싱 | 사전에 있는 표현 → 필터 적용 | 구조화 필터 UI로 전환, 빈 화면 없음 | §9.1 AC5 |
+| 근거 4항목 검증 | 전부 존재 → 후보 유지 | 하나라도 누락 → **후보에서 배제** | §9.3 AC1 |
+
+실패 흐름의 상세 시퀀스는 SDD §5(SD-02 ~ SD-10), 판단 분기의 플로차트는 SDD §6(FC-01 ~ FC-06)에 있다.
+
 ### 9.1 US-1 · 예산과 조건의 동시 필터 (REQ-FUNC-001·002·004)
 
 | AC | 구분 | Given | When | Then | SLO |
@@ -470,6 +737,45 @@ events                     -- 이벤트 로그 (파티셔닝, KPI 측정 창구)
 ### 10.2 KPI 계측 계획
 
 MVP 단계에서는 A/B 실험 설계를 미리 확정하지 않는다. 실험은 **비교할 값이 신뢰 가능하게 세어진 뒤**에 설계해야 하므로, 본 절은 §10.1의 12개 지표 각각을 **어떤 사용자 행동으로 어떻게 세는지**만 확정한다.
+
+**이 그림이 말하는 것:** 사용자 행동이 어떻게 숫자가 되는지다. 이벤트 경로가 **사용자 요청 경로와 분리**되어 있어서, 계측이 실패해도 사용자는 영향을 받지 않는다.
+
+```mermaid
+flowchart LR
+    subgraph src["발생원"]
+        C["클라이언트<br/>화면 상호작용"]
+        SVC["서비스<br/>서버 이벤트"]
+        BATCH["야간 배치<br/>신선도 · 커버리지"]
+    end
+
+    Q[["이벤트 큐<br/>비동기 · 유실 허용"]]
+    ING["EventIngestor<br/>event_id 중복 제거<br/>incomplete 플래그"]
+    STITCH["SessionStitcher<br/>익명 ID → 사용자 ID 소급 병합"]
+    RAW[("events 테이블<br/>occurred_at 파티션")]
+    AGG["MetricAggregator<br/>12개 지표 집계"]
+    QC{"MetricQualityChecker<br/>누락 ≤ 2% · 결측 ≤ 1%"}
+    MART[("지표 마트<br/>일간 · 주간 · 월간")]
+    DASH["퍼널 대시보드"]
+    ALERT["MetricAlertDispatcher"]
+    GATE["릴리스 게이트 판정"]
+    UNREL["unreliable 표기<br/>게이트 판정 제외"]
+
+    C --> Q
+    SVC --> Q
+    BATCH --> Q
+    Q --> ING --> STITCH --> RAW --> AGG --> QC
+    QC -->|"통과"| MART
+    QC -->|"결함"| UNREL
+    MART --> DASH
+    MART --> ALERT
+    MART --> GATE
+    UNREL --> GATE
+
+    style Q stroke-dasharray: 5 3
+    style UNREL fill:#f8d7da,stroke:#dc3545
+```
+
+품질 점검을 **집계 뒤, 게이트 앞**에 둔 것이 이 구조의 핵심이다 — 계측 결함과 제품 실패를 구분하지 못하면 잘못된 릴리스 결정을 하게 된다(§10.2.5).
 
 #### 10.2.1 계측 기본 규칙
 
@@ -740,6 +1046,51 @@ REQ-FUNC-008 · 009 개시"]:::p2
 | REQ-FUNC-008 | Could | P2 | 1 SP | S7 | REQ-FUNC-007 |
 | REQ-FUNC-009 | Could | P2 | 1 SP | S8 | REQ-FUNC-001 · 006 · 007 · 008 |
 | REQ-FUNC-010 | Won't (필드만) | P1 | — | REQ-FUNC-001의 S0에 포함 | — |
+
+**이 그림이 말하는 것:** 화살표는 "이것이 끝나야 저것을 시작할 수 있다"는 선행 관계다. **실선은 필수 선행, 점선은 품질 의존**(없어도 동작하지만 값이 떨어짐)이다. 상자 안 숫자는 스프린트 번호다.
+
+```mermaid
+flowchart LR
+    F1["REQ-FUNC-001<br/>색인 · S0–S1<br/>2 SP"]:::base
+    F2["REQ-FUNC-002<br/>가격 필터 · S2"]:::must
+    F3["REQ-FUNC-003<br/>메뉴 추천 · S2"]:::must
+    F4["REQ-FUNC-004<br/>자연어 검색 · S3"]:::must
+    F5["REQ-FUNC-005<br/>근거 표기 · S3"]:::must
+    F6["REQ-FUNC-006<br/>Top-3 · S4"]:::must
+    F7["REQ-FUNC-007<br/>예약 · 결제 · S5–S6"]:::should
+    F8["REQ-FUNC-008<br/>매장 콘솔 · S7"]:::could
+    F9["REQ-FUNC-009<br/>소환 · 대화방 · S8"]:::could
+    F10["REQ-FUNC-010<br/>성분 · 접근성 필드"]:::wont
+    NS(["북극성<br/>WEBD"]):::ns
+    DEP(["DEP-01<br/>PG 계약"]):::ext
+
+    F1 --> F2
+    F1 --> F3
+    F1 --> F4
+    F1 --> F5
+    F1 -.-> F10
+    F2 --> F6
+    F3 --> F6
+    F4 --> F6
+    F5 --> F6
+    F6 --> NS
+    F6 --> F7
+    DEP --> F7
+    F7 --> F8
+    F8 --> F9
+    F1 --> F9
+    F6 --> F9
+    F9 --> NS
+    F5 -.->|"제안 근거 문장 재사용"| F9
+
+    classDef base fill:#f8d7da,stroke:#dc3545,font-weight:bold
+    classDef must fill:#e7f1ff,stroke:#0d6efd
+    classDef should fill:#fff3cd,stroke:#e0a800
+    classDef could fill:#d1e7dd,stroke:#198754
+    classDef wont fill:#e2e3e5,stroke:#6c757d
+    classDef ns fill:#cff4fc,stroke:#0dcaf0,font-weight:bold
+    classDef ext fill:#f5f5f5,stroke:#adb5bd,stroke-dasharray: 4 3
+```
 
 **병목** — REQ-FUNC-001이 밀리면 여섯 개가 함께 밀리고, REQ-FUNC-007이 밀리면 두 개가 함께 밀린다. Could 우선순위인 REQ-FUNC-008·009는 각각 **1 SP 안에 구현 가능한 범위**로 정의되어 있다.
 
