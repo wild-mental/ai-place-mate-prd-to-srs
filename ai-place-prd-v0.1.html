@@ -1,0 +1,1718 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 장소 큐레이션 PRD v0.1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0f12; --bg2:#0e1519; --panel:#121b20; --panel2:#16222a;
+    --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.16);
+    --tx:#e9f1ee; --tx2:#a8bab4; --tx3:#6f8480;
+    --naver:#03C75A; --cyan:#3fd0e8; --amber:#ffb02e; --red:#ff5d5d; --violet:#a98bff;
+    --rose:#ff7fb0;
+    --w:1340px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(1100px 620px at 84% -8%, rgba(255,127,176,.12), transparent 60%),
+      radial-gradient(900px 520px at 4% 104%, rgba(63,208,232,.09), transparent 62%),
+      var(--bg);
+    color:var(--tx);
+    font-family:"Noto Sans KR","Malgun Gothic",-apple-system,BlinkMacSystemFont,sans-serif;
+    font-weight:400; overflow:hidden; -webkit-font-smoothing:antialiased;
+  }
+
+  #bar{position:fixed;top:0;left:0;height:3px;width:0;
+    background:linear-gradient(90deg,var(--rose),var(--cyan));z-index:60;
+    transition:width .35s cubic-bezier(.4,0,.2,1); box-shadow:0 0 14px rgba(255,127,176,.5)}
+  .hud{position:fixed;bottom:16px;right:22px;z-index:60;display:flex;align-items:center;gap:13px;
+    font-size:12px;color:var(--tx3);letter-spacing:.04em}
+  .hud kbd{display:inline-block;padding:2px 7px;border:1px solid var(--line2);border-radius:5px;
+    background:rgba(255,255,255,.04);color:var(--tx2);font-family:inherit;font-size:11px}
+  .counter{font-size:13px;color:var(--tx2);font-variant-numeric:tabular-nums}
+  .counter b{color:var(--rose);font-size:19px;font-weight:700}
+  .navbtn{width:29px;height:29px;border:1px solid var(--line2);border-radius:8px;background:rgba(255,255,255,.03);
+    color:var(--tx2);cursor:pointer;font-size:14px;line-height:1}
+  .navbtn:hover{border-color:var(--rose);color:var(--rose)}
+
+  #deck{position:relative;height:100vh;width:100vw}
+  .slide{position:absolute;inset:0;display:flex;flex-direction:column;
+    padding:46px clamp(26px,4.2vw,72px) 62px;overflow-y:auto;
+    opacity:0;visibility:hidden;transform:translateY(14px);
+    transition:opacity .4s ease,transform .4s ease,visibility .4s}
+  .slide.on{opacity:1;visibility:visible;transform:none}
+  .inner{width:100%;max-width:var(--w);margin:auto}
+  .slide::-webkit-scrollbar{width:7px}
+  .slide::-webkit-scrollbar-thumb{background:var(--line2);border-radius:4px}
+
+  .eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.22em;color:var(--rose);margin-bottom:13px}
+  h1{font-size:clamp(30px,4.4vw,54px);font-weight:900;line-height:1.14;letter-spacing:-.02em}
+  h2{font-size:clamp(22px,2.7vw,33px);font-weight:800;line-height:1.2;letter-spacing:-.015em}
+  h3{font-size:14.5px;font-weight:700;color:var(--tx);margin-bottom:11px;letter-spacing:-.01em}
+  p{color:var(--tx2);line-height:1.7;font-size:14.5px;font-weight:300}
+  .lead{font-size:clamp(14.5px,1.5vw,18px);color:var(--tx2);line-height:1.66;font-weight:300}
+  .muted{color:var(--tx3);font-size:12px;line-height:1.62;font-weight:300}
+  strong{font-weight:700;color:var(--tx)}
+  .hl{color:var(--naver);font-weight:700}
+  .hl2{color:var(--cyan);font-weight:700}
+  .hl3{color:var(--violet);font-weight:700}
+  .hlr{color:var(--rose);font-weight:700}
+  .hla{color:var(--amber);font-weight:700}
+
+  .khead{display:flex;align-items:flex-end;justify-content:space-between;gap:22px;
+    padding-bottom:16px;margin-bottom:20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .knum{font-size:12px;font-weight:700;color:var(--tx3);letter-spacing:.15em;margin-bottom:9px}
+  .knum em{font-style:normal;color:var(--rose)}
+  .ktitle{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+  .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:100px;
+    font-size:12.5px;font-weight:700;white-space:nowrap}
+  .badge i{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 9px currentColor}
+  .b-core{background:rgba(63,208,232,.12);color:var(--cyan);border:1px solid rgba(63,208,232,.32)}
+  .b-adj{background:rgba(3,199,90,.13);color:#4fe08c;border:1px solid rgba(3,199,90,.32)}
+  .b-ext{background:rgba(255,93,93,.12);color:var(--red);border:1px solid rgba(255,93,93,.32)}
+  .b-non{background:rgba(255,255,255,.06);color:var(--tx2);border:1px solid var(--line2)}
+  .b-rose{background:rgba(255,127,176,.12);color:var(--rose);border:1px solid rgba(255,127,176,.32)}
+
+  .strip{display:flex;gap:5px;margin-bottom:18px;flex-wrap:wrap}
+  .strip span{flex:1;min-width:96px;padding:6px 6px;text-align:center;font-size:10.5px;font-weight:500;
+    color:var(--tx3);border:1px solid var(--line);border-radius:7px;background:rgba(255,255,255,.02);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .strip span.on{color:#2a0d1a;font-weight:700;background:var(--rose);border-color:var(--rose)}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:start}
+  .cols.w6{grid-template-columns:1.12fr .88fr}
+  .cols.w4{grid-template-columns:.88fr 1.12fr}
+  .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .g2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media (max-width:940px){.cols,.cols.w6,.cols.w4,.g3,.g2,.g4{grid-template-columns:1fr}}
+
+  .card{background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);
+    border-radius:15px;padding:19px 21px}
+  .card.accent{border-color:rgba(3,199,90,.3);background:linear-gradient(160deg,rgba(3,199,90,.09),var(--bg2))}
+  .card.warn{border-color:rgba(255,93,93,.27);background:linear-gradient(160deg,rgba(255,93,93,.07),var(--bg2))}
+  .card.vio{border-color:rgba(169,139,255,.28);background:linear-gradient(160deg,rgba(169,139,255,.08),var(--bg2))}
+  .card.cy{border-color:rgba(63,208,232,.26);background:linear-gradient(160deg,rgba(63,208,232,.07),var(--bg2))}
+  .card.amb{border-color:rgba(255,176,46,.26);background:linear-gradient(160deg,rgba(255,176,46,.07),var(--bg2))}
+  .card.rose{border-color:rgba(255,127,176,.3);background:linear-gradient(160deg,rgba(255,127,176,.09),var(--bg2))}
+  .card .k{font-size:10.5px;font-weight:700;letter-spacing:.15em;color:var(--tx3);margin-bottom:10px}
+  .big{font-size:clamp(24px,3.1vw,36px);font-weight:900;letter-spacing:-.02em;line-height:1}
+  .big small{font-size:14px;font-weight:500;color:var(--tx3);letter-spacing:0}
+  .ttl{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;margin-bottom:13px}
+  .card.vio .ttl{color:#c4b0ff} .card.cy .ttl{color:var(--cyan)} .card.warn .ttl{color:var(--red)}
+  .card.accent .ttl{color:#4fe08c} .card.amb .ttl{color:var(--amber)} .card.rose .ttl{color:var(--rose)}
+
+  ul.ev{list-style:none;display:flex;flex-direction:column;gap:11px}
+  ul.ev li{position:relative;padding-left:22px;font-size:13.4px;line-height:1.64;color:var(--tx2);font-weight:300}
+  ul.ev li::before{content:"";position:absolute;left:2px;top:7px;width:8px;height:8px;border-radius:2px;
+    background:var(--rose);opacity:.85;transform:rotate(45deg)}
+  ul.ev.grn li::before{background:var(--naver)}
+  ul.ev.red li::before{background:var(--red)}
+  ul.ev.amb li::before{background:var(--amber)}
+  ul.ev.vio li::before{background:var(--violet)}
+  ul.ev.cy li::before{background:var(--cyan)}
+  ul.ev li b{color:var(--tx);font-weight:700}
+
+  .quote{border-left:2px solid var(--line2);padding:1px 0 1px 15px;margin-bottom:17px}
+  .quote:last-child{margin-bottom:0}
+  .src{display:inline-block;padding:2px 9px;border-radius:5px;font-size:10.5px;font-weight:700;
+    letter-spacing:.05em;margin-bottom:8px}
+  .s-seg{background:rgba(63,208,232,.12);color:var(--cyan);border:1px solid rgba(63,208,232,.3)}
+  .s-ksf{background:rgba(169,139,255,.13);color:#c4b0ff;border:1px solid rgba(169,139,255,.3)}
+  .quote .q{font-size:13.3px;line-height:1.66;color:var(--tx2);font-weight:300}
+  .quote .q b{color:var(--tx);font-weight:700}
+  .quote .q i{font-style:normal;color:#ffb0d0;font-weight:500}
+
+  .kpis{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+  .kpis span{font-size:11.5px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.045);
+    border:1px solid var(--line);color:var(--tx2)}
+
+  .takeaway{margin-top:20px;display:flex;gap:15px;align-items:flex-start;
+    padding:16px 20px;border-radius:13px;border:1px solid rgba(255,127,176,.3);
+    background:linear-gradient(100deg,rgba(255,127,176,.11),rgba(255,127,176,.02))}
+  .takeaway .tag{flex:none;font-size:10.5px;font-weight:700;letter-spacing:.13em;color:var(--rose);
+    padding-top:3px;white-space:nowrap}
+  .takeaway p{color:var(--tx);font-size:13.6px;line-height:1.64;font-weight:400}
+  .takeaway.warn{border-color:rgba(255,93,93,.28);background:linear-gradient(100deg,rgba(255,93,93,.09),transparent)}
+  .takeaway.warn .tag{color:var(--red)}
+  .takeaway.grn{border-color:rgba(3,199,90,.28);background:linear-gradient(100deg,rgba(3,199,90,.1),transparent)}
+  .takeaway.grn .tag{color:var(--naver)}
+  .takeaway.cy{border-color:rgba(63,208,232,.3);background:linear-gradient(100deg,rgba(63,208,232,.1),transparent)}
+  .takeaway.cy .tag{color:var(--cyan)}
+  .takeaway.vio{border-color:rgba(169,139,255,.3);background:linear-gradient(100deg,rgba(169,139,255,.11),transparent)}
+  .takeaway.vio .tag{color:#c4b0ff}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:12px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:10.5px;letter-spacing:.13em;color:var(--tx3);font-weight:700;text-transform:uppercase}
+  td{color:var(--tx2);font-weight:300;line-height:1.55}
+  td b{color:var(--tx);font-weight:700}
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--tx);font-weight:700;text-align:right}
+  tr:last-child td{border-bottom:none}
+  .tag-s{display:inline-block;padding:3px 9px;border-radius:6px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .t-fatal{background:rgba(255,93,93,.13);color:var(--red)}
+  .t-high{background:rgba(255,176,46,.13);color:var(--amber)}
+  .t-cum{background:rgba(169,139,255,.14);color:#c4b0ff}
+  .t-ok{background:rgba(3,199,90,.14);color:#4fe08c}
+  .t-cy{background:rgba(63,208,232,.14);color:var(--cyan)}
+  .t-rose{background:rgba(255,127,176,.15);color:var(--rose)}
+  .t-off{background:rgba(255,255,255,.06);color:var(--tx3)}
+  .tscroll{overflow-x:auto}
+  .tscroll table{min-width:760px}
+
+  /* 페르소나 카드 */
+  .pcard{border:1px solid var(--line);border-radius:15px;padding:16px 18px;
+    background:linear-gradient(160deg,var(--panel),var(--bg2));display:flex;flex-direction:column;gap:11px}
+  .pcard.core{border-color:rgba(63,208,232,.3);background:linear-gradient(160deg,rgba(63,208,232,.075),var(--bg2))}
+  .pcard.adj{border-color:rgba(3,199,90,.3);background:linear-gradient(160deg,rgba(3,199,90,.075),var(--bg2))}
+  .pcard.ext{border-color:rgba(255,93,93,.3);background:linear-gradient(160deg,rgba(255,93,93,.065),var(--bg2))}
+  .pcard.non{border-color:var(--line2);background:linear-gradient(160deg,rgba(255,255,255,.035),var(--bg2))}
+  .pcard.rose{border-color:rgba(255,127,176,.32);background:linear-gradient(160deg,rgba(255,127,176,.085),var(--bg2))}
+  .ph{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    padding-bottom:10px;border-bottom:1px solid var(--line)}
+  .ph .pid{font-size:10.5px;font-weight:700;letter-spacing:.14em;color:var(--tx3);margin-bottom:4px}
+  .pcard.core .pid{color:var(--cyan)} .pcard.adj .pid{color:#4fe08c}
+  .pcard.ext .pid{color:var(--red)} .pcard.non .pid{color:var(--tx2)}
+  .pcard.rose .pid{color:var(--rose)}
+  .ph .pnm{font-size:16px;font-weight:800;letter-spacing:-.01em;color:var(--tx)}
+  .ph .pjb{font-size:11.5px;color:var(--tx3);margin-top:3px}
+  .ph .pqt{font-size:12px;color:var(--tx2);font-weight:500;font-style:italic;max-width:46%;text-align:right;line-height:1.5}
+  .prow{display:grid;grid-template-columns:74px 1fr;gap:10px;align-items:start}
+  .prow dt{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--tx3);padding-top:2px}
+  .prow dd{font-size:12.6px;line-height:1.55;color:var(--tx2);font-weight:300}
+  .prow dd b{color:var(--tx);font-weight:700}
+  .emo{display:inline-block;padding:2px 9px;border-radius:5px;font-size:11px;font-weight:700;
+    background:rgba(255,127,176,.13);color:#ffb0d0;border:1px solid rgba(255,127,176,.28)}
+  @media (max-width:640px){.ph .pqt{max-width:100%;text-align:left}}
+
+  .chart{background:rgba(255,255,255,.022);border:1px solid var(--line);border-radius:15px;
+    padding:18px 14px;display:flex;align-items:center;justify-content:center;min-height:110px}
+  .chart pre.mermaid{background:none;border:none;width:100%;text-align:center;
+    color:var(--tx3);font-size:11px;white-space:pre-wrap}
+  .chart svg{max-width:100%;height:auto}
+  .cap{margin-top:9px;font-size:11px;color:var(--tx3);text-align:center;letter-spacing:.04em}
+
+  .cover{max-width:1000px}
+  .cover .rule{width:70px;height:4px;border-radius:2px;
+    background:linear-gradient(90deg,var(--rose),var(--cyan));margin:24px 0 28px}
+  .meta{display:flex;gap:32px;flex-wrap:wrap;margin-top:34px;padding-top:24px;border-top:1px solid var(--line)}
+  .meta div .k{font-size:10px;letter-spacing:.15em;color:var(--tx3);font-weight:700;margin-bottom:6px}
+  .meta div .v{font-size:13.5px;color:var(--tx);font-weight:500}
+  a.xlink{color:var(--cyan);text-decoration:none;border-bottom:1px dotted rgba(63,208,232,.5);font-weight:500}
+  a.xlink:hover{color:#8fe7f6}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px;color:var(--tx3);margin-top:14px}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .legend i{width:9px;height:9px;border-radius:3px;display:inline-block}
+
+  /* ===== PRD 전용 ===== */
+  .h3{display:flex;align-items:baseline;gap:10px;margin:0 0 13px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+  .h3 em{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--rose);
+    padding:3px 9px;border-radius:6px;background:rgba(255,127,176,.15);flex:none}
+  .h3 b{font-size:15px;font-weight:800;color:var(--tx);letter-spacing:-.01em}
+  .h3 span{margin-left:auto;font-size:10.5px;color:var(--tx3);font-weight:700;white-space:nowrap}
+
+  .kpi table{min-width:1000px}
+  .kpi td{font-size:12px;line-height:1.5;padding:10px 11px}
+  .kpi td.n{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;font-weight:700;color:var(--tx)}
+  .kpi tr.ns td{background:rgba(255,127,176,.09)}
+  .kpi tr.ns td b{color:#ffb3d2}
+
+  .story{border:1px solid var(--line);border-radius:13px;overflow:hidden;margin-bottom:15px}
+  .story .sh{padding:12px 16px;background:rgba(63,208,232,.08);border-bottom:1px solid var(--line)}
+  .story .sh .id{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--cyan);margin-bottom:5px}
+  .story .sh .txt{font-size:13px;line-height:1.6;color:var(--tx);font-weight:400}
+  .story .sh .txt b{color:#96e8f5;font-weight:700}
+  .story .sb{padding:13px 16px}
+  .ac{display:flex;flex-direction:column;gap:9px}
+  .ac > div{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:start}
+  .ac .id2{font-size:10px;font-weight:800;letter-spacing:.05em;color:var(--rose);padding-top:2px;
+    background:rgba(255,127,176,.13);border-radius:5px;text-align:center;padding:3px 0}
+  .ac .body{font-size:11.9px;line-height:1.62;color:var(--tx2);font-weight:300}
+  .ac .body b{color:var(--tx);font-weight:700}
+  .ac .body .g{color:#7fe8ab;font-weight:700} .ac .body .w{color:#ffd08f;font-weight:700}
+  .ac .body .t{color:#96e8f5;font-weight:700}
+  .ac .body .thr{display:inline-block;margin-left:4px;padding:1px 7px;border-radius:5px;font-size:10.5px;
+    font-weight:800;background:rgba(3,199,90,.16);color:#7fe8ab;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+  .ms{display:inline-block;min-width:52px;text-align:center;padding:3px 9px;border-radius:6px;
+    font-size:10.5px;font-weight:800;white-space:nowrap}
+  .ms.M{background:rgba(255,93,93,.2);color:#ff9494;border:1px solid rgba(255,93,93,.42)}
+  .ms.S{background:rgba(255,176,46,.18);color:#ffd08f;border:1px solid rgba(255,176,46,.4)}
+  .ms.C{background:rgba(63,208,232,.16);color:#96e8f5;border:1px solid rgba(63,208,232,.34)}
+  .ms.W{background:rgba(255,255,255,.05);color:var(--tx3);border:1px solid var(--line2)}
+
+  .nfr{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .nfr > div{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:rgba(255,255,255,.022)}
+  .nfr h4{font-size:12.8px;font-weight:800;color:var(--tx);margin-bottom:9px;letter-spacing:-.01em}
+  .nfr dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:11.8px;line-height:1.5}
+  .nfr dt{color:var(--tx3);font-weight:700;white-space:nowrap}
+  .nfr dd{color:var(--tx2);font-weight:300}
+  .nfr dd b{color:var(--tx);font-weight:700;font-variant-numeric:tabular-nums}
+  @media (max-width:940px){.nfr{grid-template-columns:1fr}}
+
+  .risk{border-left:3px solid var(--red);border-radius:0 11px 11px 0;padding:12px 15px;
+    background:rgba(255,93,93,.06);margin-bottom:11px}
+  .risk .rh{display:flex;align-items:baseline;gap:9px;margin-bottom:6px}
+  .risk .rh em{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.08em;color:#ff9494}
+  .risk .rh b{font-size:12.6px;font-weight:800;color:var(--tx)}
+  .risk .rh span{margin-left:auto;font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;white-space:nowrap}
+  .risk .rh span.hi{background:rgba(255,93,93,.2);color:#ff9494}
+  .risk .rh span.md{background:rgba(255,176,46,.18);color:#ffd08f}
+  .risk p{font-size:11.7px;line-height:1.6}
+  .risk p.mit{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line2);color:var(--tx2)}
+  .risk p.mit::before{content:"완화 ";font-weight:800;color:#7fe8ab;font-size:10px;letter-spacing:.06em}
+
+  .ent table{min-width:1060px}
+  .ent td{font-size:11.7px;line-height:1.5;padding:9px 10px;vertical-align:top}
+  .ent td code,.mono{font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:11px;
+    background:rgba(255,255,255,.05);padding:1px 5px;border-radius:4px;color:#96e8f5}
+
+  .srcs{display:flex;flex-direction:column;gap:3px;margin-top:6px}
+  .srcs a{font-size:10.3px;color:var(--cyan);text-decoration:none;line-height:1.45;
+    border-bottom:1px dotted rgba(63,208,232,.35)}
+  .srcs a:hover{color:#8fe7f6}
+  .srcs a::before{content:"\2197 ";opacity:.55}
+
+  /* ── 부록: 문서 간 기준 대장 (cross-deck registry) ── */
+  .xtb{width:100%;border-collapse:collapse;font-size:12.5px;margin:0}
+  .xtb th,.xtb td{padding:7px 9px;border-bottom:1px solid rgba(255,255,255,.085);text-align:left;vertical-align:top;line-height:1.5}
+  .xtb th{font-weight:700;color:#9fb2bc;font-size:11px;letter-spacing:.05em;background:rgba(255,255,255,.035);white-space:nowrap}
+  .xtb td b{color:#eaf3f7}
+  .xtb tr:last-child td{border-bottom:none}
+  .xtb .xn{white-space:nowrap;font-variant-numeric:tabular-nums}
+  .xwrap{border:1px solid rgba(255,255,255,.1);border-radius:11px;overflow:hidden;background:rgba(255,255,255,.02)}
+  .xcap{font:700 10.5px/1 system-ui,sans-serif;letter-spacing:.09em;color:#8fa3ad;text-transform:uppercase;padding:9px 10px 8px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
+  .xbox{border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:12px 14px;background:rgba(255,255,255,.025)}
+  .xbox h4{margin:0 0 6px;font-size:13px;color:#eaf3f7;font-weight:700}
+  .xbox p{margin:0;font-size:12.5px;line-height:1.65;color:#a9bcc5}
+  .xbox p+p{margin-top:7px}
+  .xbox.rz{border-color:rgba(255,127,176,.34);background:rgba(255,127,176,.065)}
+  .xbox.cz{border-color:rgba(63,208,232,.32);background:rgba(63,208,232,.055)}
+  .xbox.gz{border-color:rgba(3,199,90,.32);background:rgba(3,199,90,.055)}
+  .xbox.az{border-color:rgba(255,176,46,.32);background:rgba(255,176,46,.055)}
+  .xbox strong{color:#f2f8fb}
+  .xk{display:inline-block;font:700 10px/1 system-ui,sans-serif;letter-spacing:.05em;padding:3px 6px;border-radius:5px;vertical-align:1px}
+  .xk.a{background:rgba(255,93,93,.17);color:#ffa3a3}
+  .xk.b{background:rgba(255,176,46,.17);color:#ffd08a}
+  .xk.c{background:rgba(3,199,90,.17);color:#8bebb1}
+  .x2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .x3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .xg{display:grid;gap:13px}
+  @media(max-width:1000px){.x2,.x3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="bar"></div>
+<main id="deck">
+
+<!-- 01 COVER -->
+<section class="slide">
+  <div class="inner cover">
+    <div class="eyebrow">PRODUCT REQUIREMENT DOCUMENT &middot; v0.1</div>
+    <h1>조건을 말하면<br>근거가 붙은 세 곳이 온다</h1>
+    <div class="rule"></div>
+    <p class="lead">
+      AI 장소 큐레이션 서비스의 제품 요구사항 문서입니다.
+      Value Proposition에서 확정한 <strong>MVP 아홉 기능(F1&ndash;F9)</strong>을
+      사용자 스토리와 수용 기준, 비기능 요구사항, 실험 설계로 옮겼습니다.
+    </p>
+    <p class="lead" style="margin-top:14px">
+      모든 Pain에 <strong class="hlr">실패 KPI</strong>를 붙이고, 모든 AC에 <strong class="hlr">측정 가능한 임계치</strong>를 넣었습니다.
+      기준선은 출처를 표시했습니다. <span class="mono">H</span> 가설(모의 인터뷰&middot;여정 지도 추정),
+      <span class="mono">E</span> 외부 공개 자료,
+      <span class="mono">M</span> 직접 측정 가능(경쟁사 화면 관찰).
+    </p>
+    <div class="meta">
+      <div><div class="k">Owner 팀</div><div class="v">5팀</div></div>
+      <div><div class="k">최종 업데이트</div><div class="v">2026-08-20</div></div>
+      <div><div class="k">버전</div><div class="v">v0.1 &middot; 초안</div></div>
+      <div><div class="k">MVP 범위</div><div class="v">F1&ndash;F9 &middot; Must 6 / Should 1 / Could 2</div></div>
+    </div>
+    <p class="muted" style="margin-top:26px">
+      <strong>기준선의 대부분이 가설입니다.</strong> 인터뷰 열한 건은 모의이고 로그는 0건입니다.
+      이 문서의 목적은 정확한 목표값을 제시하는 것이 아니라
+      <strong class="hlr">무엇을 측정하면 틀렸음을 알 수 있는지</strong>를 못 박는 것입니다.
+      Phase 0 드라이런에서 기준선을 <span class="mono">M</span>으로 전환한 뒤 목표값을 재설정합니다.
+    </p>
+  </div>
+</section>
+
+<!-- 02 §1 개요·목표 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">&sect;1 OVERVIEW &amp; GOALS</div>
+    <h2>문제 정의와 목표</h2>
+
+    <div class="h3" style="margin-top:18px"><em>1.1</em><b>문제 정의 &mdash; 실패 KPI를 붙인 Pain</b>
+      <span>출처: 페르소나 스펙트럼 &middot; 고객 여정 지도</span></div>
+    <div class="tscroll kpi">
+      <table>
+        <thead><tr>
+          <th style="width:62px">Pain</th><th style="width:230px">문제</th><th style="width:250px">실패 KPI (현행)</th>
+          <th style="width:84px">기준선</th><th style="width:52px">출처</th><th>Needs</th>
+        </tr></thead>
+        <tbody>
+          <tr><td><b>C2-1</b></td><td>인당 가격이 어디에도 표기되지 않음</td>
+            <td>예상 지출과 실제 결제액의 <b>오차율</b></td><td class="n">15%</td><td class="c"><span class="mono">H</span></td>
+            <td>목록 단계에서 인당 예상가를 오차 범위와 함께</td></tr>
+          <tr><td><b>C2-2</b></td><td>무한리필류 운영 조건이 검색어로 없음</td>
+            <td>플랫폼 내 조건 검색 <b>성공률</b></td><td class="n">0%</td><td class="c"><span class="mono">M</span></td>
+            <td>조건을 카테고리로 한정해 즉시 필터</td></tr>
+          <tr><td><b>C3-1</b></td><td>색인이 가게 단위라 메뉴명으로 진입 불가</td>
+            <td>메뉴명 질의의 <b>정답 반환률</b></td><td class="n">0%</td><td class="c"><span class="mono">M</span></td>
+            <td>메뉴명 한 번으로 취급 매장 목록</td></tr>
+          <tr><td><b>C3-2</b></td><td>우회 탐색이 여러 채널로 분산</td>
+            <td>세션당 <b>외부 채널 수</b> / 소요 시간</td><td class="n">4개 / 12분</td><td class="c"><span class="mono">H</span></td>
+            <td>1분 안에 첫 결과, 채널 하나로 완결</td></tr>
+          <tr><td><b>C4-1</b></td><td>문장형 조건을 넣을 입력 칸이 없음</td>
+            <td>상황어 질의 <b>처리율</b></td><td class="n">0%</td><td class="c"><span class="mono">M</span></td>
+            <td>머릿속 문장을 그대로 입력</td></tr>
+          <tr><td><b>C4-2</b></td><td>1인석&middot;소음&middot;체류 허용을 사전 확인 불가</td>
+            <td>방문 후 <b>조건 불일치 발생률</b></td><td class="n">35%</td><td class="c"><span class="mono">H</span></td>
+            <td>사진과 1인석 개수로 판단 재료 확보</td></tr>
+          <tr><td><b>C1-3</b></td><td>정한 곳을 정당화할 근거가 없음</td>
+            <td>후보 카드의 <b>선정 근거 표기율</b></td><td class="n">0%</td><td class="c"><span class="mono">M</span></td>
+            <td>선정 이유 한 줄 + 공유 가능한 형태</td></tr>
+          <tr><td><b>A2-2</b></td><td>룸&middot;주차&middot;법인카드&middot;단체 수용이 필터에 없음</td>
+            <td>단체 조건 확인에 드는 <b>전화 통화 수</b></td><td class="n">3통 / 15분</td><td class="c"><span class="mono">H</span></td>
+            <td>단체 조건을 한 번에 필터</td></tr>
+          <tr><td><b>N1-1&middot;2</b></td><td>추천에 선정 근거가 없어 광고로 읽음</td>
+            <td>추천 결과 <b>신뢰 응답률</b></td><td class="n">미측정</td><td class="c"><span class="mono">H</span></td>
+            <td>왜 이 집인지 문장으로 설명</td></tr>
+          <tr style="background:rgba(255,127,176,.06)"><td><b class="hlr">P5-1</b></td>
+            <td>빈 시간대에 먼저 제안할 창구가 없음</td>
+            <td>빈 좌석 <b>공석률</b> / 고정 광고비</td><td class="n">37% / 월 30만원</td><td class="c"><span class="mono">H</span></td>
+            <td>내가 조건과 폭을 정해 손님을 부르기</td></tr>
+          <tr style="background:rgba(255,127,176,.06)"><td><b class="hlr">P5-3</b></td>
+            <td>노쇼로 좌석 회전과 준비가 이중 손실</td>
+            <td>단체 예약 <b>노쇼율</b></td><td class="n">15%</td><td class="c"><span class="mono">H</span></td>
+            <td>예약이 보증되는 구조</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="h3" style="margin-top:22px"><em>1.2</em><b>목표 &mdash; 수치화한 Desired Outcome</b>
+      <span>Phase 1 클로즈드 베타 12주 기준</span></div>
+    <div class="g4">
+      <div class="card accent" style="padding:15px 17px">
+        <div class="k">탐색 노동</div><div class="big" style="margin:4px 0 8px">12분<small> &rarr; 60초</small></div>
+        <p class="muted">조건 입력에서 후보 확정까지. 외부 채널 <b>4개 &rarr; 1개</b></p>
+      </div>
+      <div class="card accent" style="padding:15px 17px">
+        <div class="k">결정 부담</div><div class="big" style="margin:4px 0 8px">&minus;20%<small> 결정 시간</small></div>
+        <p class="muted">순위 나열 대신 <b>비교 축과 근거를 미리 정리</b></p>
+      </div>
+      <div class="card accent" style="padding:15px 17px">
+        <div class="k">근거 표기</div><div class="big" style="margin:4px 0 8px">0%<small> &rarr; 100%</small></div>
+        <p class="muted">모든 후보에 <b>선정 이유 + 확인 일자</b></p>
+      </div>
+      <div class="card rose" style="padding:15px 17px">
+        <div class="k">공급 측 고정비</div><div class="big" style="margin:4px 0 8px">30만<small> &rarr; 0원</small></div>
+        <p class="muted">고정 광고비를 <b>제안 성사 건당 수수료</b>로 전환</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 §1 KPI -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">&sect;1.3 SUCCESS METRICS</div>
+    <h2>북극성 KPI와 보조 KPI</h2>
+    <p class="lead" style="margin:14px 0 18px">
+      북극성은 <strong>&lsquo;조건을 말하고 근거를 받아 결정까지 끝낸 세션&rsquo;</strong> 하나로 잡았습니다.
+      조건 말하기&middot;근거 제시&middot;압축&middot;결정이 <strong class="hlr">한 지표 안에서 동시에 성립해야</strong> 값이 올라갑니다.
+    </p>
+
+    <div class="tscroll kpi">
+      <table>
+        <thead><tr>
+          <th style="width:60px">구분</th><th style="width:220px">KPI</th><th style="width:230px">정의 &middot; 측정 방법</th>
+          <th style="width:96px">기준선</th><th style="width:104px">12주 목표</th><th style="width:78px">측정 주기</th><th>연결 기능</th>
+        </tr></thead>
+        <tbody>
+          <tr class="ns"><td><b>북극성</b></td>
+            <td><b>주간 근거 기반 결정 완료 수</b><br><span class="muted">WEBD &middot; Weekly Evidence-Backed Decisions</span></td>
+            <td>조건 2개 이상 입력 &rarr; Top-3 수신 &rarr; 1곳 선택(예약 또는 저장)까지 완주한 세션 수</td>
+            <td class="n">0<br><span class="muted">미출시</span></td><td class="n">5,000건/주</td><td>주간</td>
+            <td>F1&ndash;F7 전체</td></tr>
+          <tr><td>보조 1</td><td>조건 입력 완료율</td>
+            <td>입력 시작 &rarr; 조건 2개 이상 확정 비율</td><td class="n">&mdash;</td><td class="n">70%</td><td>주간</td><td>F4 &middot; F2</td></tr>
+          <tr><td>보조 2</td><td>첫 결과 p95 응답 시간</td>
+            <td>질의 수신 &rarr; Top-3 렌더 완료</td><td class="n">&mdash;</td><td class="n">&le; 1,000ms</td><td>일간</td><td>F1 &middot; F6</td></tr>
+          <tr><td>보조 3</td><td>Top-3 내 선택률</td>
+            <td>Top-3 수신 세션 중 1곳을 선택한 비율</td><td class="n">&mdash;</td><td class="n">45%</td><td>주간</td><td>F6 &middot; F5</td></tr>
+          <tr><td>보조 4</td><td>근거 표기율</td>
+            <td>선정 이유 1줄 + 확인 일자를 모두 가진 후보 카드 비율</td><td class="n">0%<span class="mono"> M</span></td><td class="n">100%</td><td>일간</td><td>F5</td></tr>
+          <tr><td>보조 5</td><td>예상가 오차 &plusmn;10% 내 비율</td>
+            <td>표기 인당 예상가 대비 실제 결제액 편차</td><td class="n">40%<span class="mono"> H</span></td><td class="n">80%</td><td>월간</td><td>F2</td></tr>
+          <tr><td>보조 6</td><td>방문 후 조건 불일치 신고율</td>
+            <td>방문 후 &lsquo;조건이 달랐다&rsquo; 신고 / 방문 건수</td><td class="n">35%<span class="mono"> H</span></td><td class="n">&le; 10%</td><td>월간</td><td>F1 &middot; F5</td></tr>
+          <tr><td>보조 7</td><td>공유 카드 생성률</td>
+            <td>결정 세션 중 근거 카드를 외부로 공유한 비율</td><td class="n">&mdash;</td><td class="n">60%</td><td>주간</td><td>F5</td></tr>
+          <tr style="background:rgba(255,127,176,.055)"><td>보조 8</td><td>3분 내 제안 도착률</td>
+            <td>대화방 형성 &rarr; 180초 내 유효 제안 1건 이상</td><td class="n">&mdash;</td><td class="n">85%</td><td>일간</td><td>F7 &middot; F8</td></tr>
+          <tr style="background:rgba(255,127,176,.055)"><td>보조 9</td><td>제안 이행률</td>
+            <td>현장에서 제안 내용이 그대로 적용된 비율</td><td class="n">&mdash;</td><td class="n">&ge; 95%</td><td>월간</td><td>F7 &middot; F9</td></tr>
+          <tr style="background:rgba(255,127,176,.055)"><td>보조 10</td><td>선택 제안 노쇼율</td>
+            <td>선택된 제안의 예약 중 미방문 비율</td><td class="n">15%<span class="mono"> H</span></td><td class="n">&le; 5%</td><td>월간</td><td>F9</td></tr>
+          <tr style="background:rgba(255,127,176,.055)"><td>보조 11</td><td>가맹점 월 제안 참여율</td>
+            <td>활성 가맹점 중 월 1회 이상 제안한 비율</td><td class="n">&mdash;</td><td class="n">60%</td><td>월간</td><td>F8</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cols w6" style="margin-top:18px">
+      <div class="card warn">
+        <div class="ttl">북극성을 이렇게 정한 이유</div>
+        <p class="muted">DAU나 검색 수를 쓰면 <strong>목록만 보고 나가는 세션</strong>이 성공으로 집계됩니다.
+          경쟁사 일곱 곳이 이미 그 지표로 운영되고, 그 결과가 &lsquo;스크롤 길이를 늘리는 제품&rsquo;입니다.
+          WEBD는 <strong class="hlr">결정까지 완주해야만</strong> 올라가므로 후보를 늘리는 방향으로는 개선되지 않습니다.</p>
+      </div>
+      <div class="card cy">
+        <div class="ttl">게이트 조건</div>
+        <p class="muted">보조 8&ndash;11(에이전트 제안 4개)은 <strong>Phase 2에서만 측정</strong>합니다.
+          보조 10(노쇼율)이 <strong>목표를 넘으면 F7&middot;F8을 중단</strong>하고 F9를 먼저 고칩니다. 가맹점은 노쇼 한 번으로 이탈하므로 이 순서를 뒤집을 수 없습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 §2 사용자와 페르소나 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">&sect;2 USERS &amp; PERSONAS</div>
+    <h2>핵심 페르소나와 여정 Pain</h2>
+    <p class="lead" style="margin:14px 0 18px">
+      스펙트럼 열두 명 중 <strong>MVP 아홉 기능이 실제로 건드리는 다섯 명</strong>만 남겼습니다.
+      나머지는 v0.1 범위 밖이며, 스키마 자리만 확보한 두 명(E1&middot;E2)은 별도로 표시했습니다.
+    </p>
+
+    <div class="tscroll">
+      <table>
+        <thead><tr>
+          <th style="width:132px">페르소나</th><th style="width:82px">역할</th><th style="width:210px">여정에서 멈추는 지점</th>
+          <th style="width:130px">실패 KPI</th><th style="width:96px">v0.1 범위</th><th>JTBD 선언 요지</th>
+        </tr></thead>
+        <tbody>
+          <tr><td><b class="hl2">C2 박세훈 &middot; 26</b><br><span class="muted">대학원생 &middot; 주 3&ndash;5회</span></td>
+            <td>1차 타깃</td><td>고려 &mdash; 가격 역산</td><td>오차율 15%</td>
+            <td><span class="ms M">Must</span></td>
+            <td>가격 확인을 <b>남에게 보이지 않게</b> 끝내고 싶다</td></tr>
+          <tr><td><b class="hl2">C3 김도연 &middot; 29</b><br><span class="muted">마케터 &middot; 점심 매일</span></td>
+            <td>1차 타깃</td><td>고려 &mdash; 검색 시도</td><td>채널 4개 / 12분</td>
+            <td><span class="ms M">Must</span></td>
+            <td><b>한 번의 검색</b>으로 그 메뉴를 하는 집을</td></tr>
+          <tr><td><b class="hl2">C4 이하람 &middot; 33</b><br><span class="muted">프리랜서 &middot; 주 3&ndash;4회</span></td>
+            <td>1차 타깃</td><td>온보딩 &mdash; 방문 후 실패</td><td>불일치 35%</td>
+            <td><span class="ms M">Must</span></td>
+            <td>혼자 앉아도 이상하지 않은 자리인지 <b>가기 전에</b></td></tr>
+          <tr><td><b class="hl2">C1 정하윤 &middot; 24</b><br><span class="muted">동아리 총무 &middot; 월 1&ndash;2회</span></td>
+            <td>근거 요구</td><td>결정 &mdash; 정당화</td><td>근거 표기 0%</td>
+            <td><span class="ms M">Must</span> <span class="muted">근거만</span></td>
+            <td>정한 이유를 <b>눈에 보이게</b> 제시하고 싶다</td></tr>
+          <tr style="background:rgba(255,127,176,.06)"><td><b class="hlr">P5 로컬 사장</b><br><span class="muted">20&ndash;40석 &middot; 매일</span></td>
+            <td>공급 측</td><td>인지 &mdash; 제안 창구 부재</td><td>공석률 37%</td>
+            <td><span class="ms S">Should</span> <span class="ms C">Could</span></td>
+            <td>내 가게를 <b>내 말로 소개해</b> 맞는 손님에게 닿고 싶다</td></tr>
+          <tr style="opacity:.7"><td><b>A2 한지우 &middot; 44</b><br><span class="muted">회식 총무 &middot; 분기</span></td>
+            <td>확장</td><td>결정 &mdash; 단체 확인</td><td>전화 3통 / 15분</td>
+            <td><span class="ms C">Could</span></td>
+            <td>조건을 <b>그대로 넘겨</b> 후보를 받고 싶다</td></tr>
+          <tr style="opacity:.55"><td><b>E1 서준호 &middot; 52</b><br><span class="muted">식이 제약</span></td>
+            <td>스키마</td><td>고려 &mdash; 성분 확인</td><td>후보 0개</td>
+            <td><span class="ms W">Won't</span> <span class="muted">필드만</span></td>
+            <td>제약을 말하기 전에 <b>갈 수 있는 곳을</b> 찾아 두기</td></tr>
+          <tr style="opacity:.55"><td><b>E2 오미래 &middot; 24</b><br><span class="muted">이동 제약</span></td>
+            <td>스키마</td><td>고려 &mdash; 경로 검증</td><td>참석 포기</td>
+            <td><span class="ms W">Won't</span> <span class="muted">필드만</span></td>
+            <td>내가 말하지 않아도 <b>갈 수 있는 곳으로</b> 좁혀지기</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cols w6" style="margin-top:18px">
+      <div class="card cy">
+        <div class="ttl">v0.1이 정면으로 노리는 사람</div>
+        <p class="muted"><strong>C2&middot;C3&middot;C4 세 명</strong>입니다. 셋 다 <strong class="hl2">주 3회 이상</strong> 같은 결정을 반복하고,
+          혼자 또는 두 명이라 <strong>조율 비용이 없습니다.</strong>
+          다지점 공정 지점 산출을 2년차로 넘긴 결정과 맞물립니다. 모임은 빈도가 낮아 v0.1의 학습 속도를 만들지 못합니다.</p>
+      </div>
+      <div class="card rose">
+        <div class="ttl">C1과 P5를 다르게 쓰는 방식</div>
+        <p class="muted"><strong>C1은 근거 기능(F5)만</strong> 받습니다. 지점 산출 없이도 &ldquo;왜 여기냐&rdquo;에 답할 수 있으면 Job의 절반이 해결됩니다.
+          <strong>P5는 Phase 2</strong>에서 진입하며, <strong class="hlr">F9(예약&middot;결제)를 먼저 받고 F8&middot;F7을 나중에</strong> 받습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 §2 여정 다이어그램 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">&sect;2.2 TARGET USER JOURNEY</div>
+    <h2>v0.1이 만드는 흐름</h2>
+    <p class="lead" style="margin:14px 0 18px">
+      회색 노드가 현행 경로, 분홍이 v0.1이 대체하는 구간, 초록이 Phase 2의 에이전트 제안입니다.
+      <strong class="hlr">이탈 분기 두 개</strong>가 이 제품의 생사입니다. 1초 응답과 3분 제안.
+    </p>
+
+    <div class="chart">
+<pre class="mermaid">
+flowchart TD
+    S["트리거
+&lsquo;오늘 뭐 먹지&rsquo; · 메뉴가 떠오름"]:::trg
+    OLD1["현행: 지도앱 목록 스크롤"]:::old
+    OLD2["현행: 인스타 · 블로그 · 동료 문의"]:::old
+    OLD3["현행: 메뉴판 사진 확대 · 합산"]:::old
+    Q["조건 입력
+자연어 1줄 또는 조건 2&ndash;3개"]:::new
+    P{"조건 파싱 성공
+&amp; p95 &le; 1s"}:::dec
+    T3["근거 붙은 Top-3
+인당가 · 대표메뉴 · 상황속성 · 확인일자"]:::new
+    D{"3개 안에서
+선택하는가"}:::dec
+    SH["공유 카드 생성
+&lsquo;왜 이 곳인가&rsquo; 1줄"]:::new
+    B["에이전트 소환 · 대화방 형성
+조건 적합 매장 3~5곳"]:::bid
+    BD{"180초 내
+제안 도착"}:::dec
+    BW["제안 비교
+분위기 · 강점 · 서비스"]:::bid
+    R["예약 또는 주문량 기반 결제"]:::bid
+    WIN["결정 완료
+북극성 KPI 집계"]:::win
+    X["이탈
+현행 경로로 회귀"]:::bad
+
+    S --&gt; Q
+    S -.-&gt; OLD1 --&gt; OLD2 --&gt; OLD3 -.-&gt; X
+    Q --&gt; P
+    P --&gt;|성공| T3
+    P --&gt;|실패 · 폴백 필터| T3
+    T3 --&gt; D
+    D --&gt;|예| SH --&gt; WIN
+    D --&gt;|아니오| X
+    T3 --&gt; B
+    B --&gt; BD
+    BD --&gt;|예| BW --&gt; R --&gt; WIN
+    BD --&gt;|아니오| T3
+    classDef trg fill:#2b1622,stroke:#ff7fb0,color:#ffd0e2
+    classDef old fill:#1a1418,stroke:#5b4a52,color:#b3a4ab
+    classDef new fill:#2b1622,stroke:#ff7fb0,color:#ffd0e2
+    classDef bid fill:#10241a,stroke:#03C75A,color:#9ff0c2
+    classDef dec fill:#2a2211,stroke:#ffb02e,color:#ffd894
+    classDef win fill:#16222a,stroke:#3fd0e8,color:#dff6fb
+    classDef bad fill:#2b1414,stroke:#ff5d5d,color:#ffb3b3
+</pre>
+    </div>
+    <div class="cap">노란 분기 세 개가 측정 지점 &mdash; 조건 파싱 성공률, Top-3 내 선택률, 180초 제안 도착률</div>
+
+    <div class="g3" style="margin-top:20px">
+      <div class="card amb">
+        <div class="k">분기 01</div>
+        <h3>조건 파싱 실패 시 폴백</h3>
+        <p class="muted">자연어 파싱이 실패하면 <strong>빈 화면을 주지 않고</strong> 구조화 필터 UI로 넘깁니다.
+          파싱 실패율 목표 <b>&le; 1.5%</b>, 폴백 후에도 Top-3는 반드시 반환합니다.</p>
+      </div>
+      <div class="card amb">
+        <div class="k">분기 02</div>
+        <h3>Top-3 내 선택률 45%</h3>
+        <p class="muted">세 개 안에서 안 고르면 현행 경로로 돌아갑니다.
+          후보를 늘리는 것이 아니라 <strong class="hla">근거를 붙이는 것</strong>으로 이 수치를 올립니다.</p>
+      </div>
+      <div class="card amb">
+        <div class="k">분기 03</div>
+        <h3>제안 미도착 시 회귀</h3>
+        <p class="muted">180초 내 제안이 없으면 <strong>제안 없는 Top-3</strong>로 되돌립니다.
+          빈 제안 화면을 보여 주면 <b>참여 매장이 없는 서비스</b>로 읽힙니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 §3 사용자 스토리 1~3 -->
+<section class="slide">
+  <div class="inner">
+    <div class="khead">
+      <div>
+        <div class="knum">&sect;3 USER STORIES &amp; <em>ACCEPTANCE CRITERIA</em></div>
+        <div class="ktitle"><h2>수요 측 스토리 &mdash; US-1 &sim; US-3</h2></div>
+      </div>
+      <div class="badge b-core"><i></i>AC 각 3개 이상 &middot; 임계치 포함</div>
+    </div>
+
+    <div class="story">
+      <div class="sh">
+        <div class="id">US-1 &middot; F1 &middot; F2 &middot; F4 &middot; Must</div>
+        <div class="txt">As a <b>인당 예산이 먼저 정해진 이용자(C2)</b>, I want <b>가격과 조건을 한 화면에서 걸러 내기</b>,
+          so that <b>남 앞에서 메뉴판을 확대하지 않고 예산을 지킬 수 있다</b>.</div>
+      </div>
+      <div class="sb">
+        <div class="ac">
+          <div><div class="id2">AC1</div><div class="body">
+            <span class="g">Given</span> 이용자가 인당 예산 상한을 입력한 상태에서,
+            <span class="w">When</span> 후보 목록을 요청하면,
+            <span class="t">Then</span> 모든 후보 카드에 <b>인당 예상가와 오차 범위</b>가 표시된다.
+            <span class="thr">표기율 100%</span> <span class="thr">범위 폭 &le; &plusmn;20%</span></div></div>
+          <div><div class="id2">AC2</div><div class="body">
+            <span class="g">Given</span> 예산 상한이 2만원이고,
+            <span class="w">When</span> 인당 예상가 상한이 2만원을 넘는 매장이 존재하면,
+            <span class="t">Then</span> 해당 매장은 기본 결과에서 제외되고 &lsquo;예산 초과 N곳&rsquo;으로만 요약된다.
+            <span class="thr">오탐률 &le; 3%</span></div></div>
+          <div><div class="id2">AC3</div><div class="body">
+            <span class="g">Given</span> 이용자가 &lsquo;야채 무한리필&rsquo; 같은 운영 조건을 입력하고,
+            <span class="w">When</span> 조건 카테고리 사전에 해당 항목이 등록되어 있으면,
+            <span class="t">Then</span> 그 조건을 만족하는 매장만 반환한다.
+            <span class="thr">카테고리 적중률 &ge; 90%</span> <span class="thr">응답 p95 &le; 1,000ms</span></div></div>
+          <div><div class="id2">AC4</div><div class="body">
+            <span class="g">Given</span> 방문 후 결제가 완료되고,
+            <span class="w">When</span> 이용자가 실제 결제액을 입력하면,
+            <span class="t">Then</span> 표기 예상가와의 편차를 기록하고 다음 표기에 반영한다.
+            <span class="thr">&plusmn;10% 내 비율 &ge; 80%</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="story">
+      <div class="sh">
+        <div class="id">US-2 &middot; F3 &middot; F6 &middot; Must</div>
+        <div class="txt">As a <b>메뉴가 먼저 떠오르는 직장인(C3)</b>, I want <b>메뉴명 한 번으로 그 메뉴를 하는 집을 받기</b>,
+          so that <b>점심 오십 분 안에 내가 고른 것을 먹을 수 있다</b>.</div>
+      </div>
+      <div class="sb">
+        <div class="ac">
+          <div><div class="id2">AC1</div><div class="body">
+            <span class="g">Given</span> 이용자가 반경 1km 안에 있고,
+            <span class="w">When</span> 검색창에 메뉴명 하나만 입력하면,
+            <span class="t">Then</span> <b>업종 목록이 아니라</b> 해당 메뉴를 취급하는 매장 Top-3가 반환된다.
+            <span class="thr">정답 반환률 &ge; 92%</span> <span class="thr">첫 결과 p95 &le; 1,000ms</span></div></div>
+          <div><div class="id2">AC2</div><div class="body">
+            <span class="g">Given</span> 메뉴 색인에 해당 메뉴가 없고,
+            <span class="w">When</span> 유사 메뉴가 3건 이상 존재하면,
+            <span class="t">Then</span> &lsquo;찾는 메뉴가 없어 유사 메뉴로 대체했다대체했다&rsquo>rsquo;를 명시하고 반환한다.
+            <span class="thr">빈 결과 반환률 &le; 2%</span></div></div>
+          <div><div class="id2">AC3</div><div class="body">
+            <span class="g">Given</span> 조건 입력 필드가 노출된 상태에서,
+            <span class="w">When</span> 이용자가 추가 조건을 입력하지 않고 바로 검색하면,
+            <span class="t">Then</span> 필수 입력 없이 결과가 반환된다.
+            <span class="thr">필수 입력 필드 0개</span> <span class="thr">입력 단계 &le; 1회</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="story">
+      <div class="sh">
+        <div class="id">US-3 &middot; F5 &middot; F6 &middot; F1 &middot; Must</div>
+        <div class="txt">As a <b>가기 전에 판단하고 싶은 이용자(C4&middot;C1&middot;N1)</b>, I want <b>후보마다 근거와 확인 일자를 보기</b>,
+          so that <b>헛걸음하지 않고, 남에게 왜 여기인지 설명할 수 있다</b>.</div>
+      </div>
+      <div class="sb">
+        <div class="ac">
+          <div><div class="id2">AC1</div><div class="body">
+            <span class="g">Given</span> Top-3가 반환된 상태에서,
+            <span class="w">When</span> 각 후보 카드를 보면,
+            <span class="t">Then</span> <b>선정 이유 1줄 + 근거 속성 + 확인 일자 + 확인 주체</b>가 모두 표시된다.
+            <span class="thr">4개 항목 표기율 100%</span></div></div>
+          <div><div class="id2">AC2</div><div class="body">
+            <span class="g">Given</span> 어떤 속성이 90일 이상 갱신되지 않았고,
+            <span class="w">When</span> 그 속성이 후보 카드에 노출되면,
+            <span class="t">Then</span> &lsquo;확인 90일 경과&rsquo; 경고를 함께 표시한다.
+            <span class="thr">경고 누락률 0%</span> <span class="thr">판정형 문구 0건</span></div></div>
+          <div><div class="id2">AC3</div><div class="body">
+            <span class="g">Given</span> 이용자가 후보를 하나 선택하고,
+            <span class="w">When</span> 공유를 요청하면,
+            <span class="t">Then</span> 선정 이유와 근거를 담은 카드가 <b>3초 내에</b> 이미지 또는 링크로 생성된다.
+            <span class="thr">생성 p95 &le; 3,000ms</span> <span class="thr">공유 카드 생성률 &ge; 60%</span></div></div>
+          <div><div class="id2">AC4</div><div class="body">
+            <span class="g">Given</span> 방문이 완료되고,
+            <span class="w">When</span> 이용자가 &lsquo;조건이 달랐다&rsquo;를 신고하면,
+            <span class="t">Then</span> 해당 속성의 확인 상태가 &lsquo;재확인 필요&rsquo;로 즉시 전환된다.
+            <span class="thr">반영 지연 &le; 60s</span> <span class="thr">불일치 신고율 &le; 10%</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 §3 사용자 스토리 4~6 -->
+<section class="slide">
+  <div class="inner">
+    <div class="khead">
+      <div>
+        <div class="knum">&sect;3 USER STORIES &amp; <em>ACCEPTANCE CRITERIA</em></div>
+        <div class="ktitle"><h2>에이전트 제안 스토리 &mdash; US-4 &sim; US-6</h2></div>
+      </div>
+      <div class="badge b-rose"><i></i>Phase 2 &middot; F9 선행</div>
+    </div>
+
+    <div class="story">
+      <div class="sh" style="background:rgba(3,199,90,.08)">
+        <div class="id" style="color:#7fe8ab">US-4 &middot; F9 &middot; Should &middot; <b>F7&middot;F8 선행 조건</b></div>
+        <div class="txt">As a <b>제안을 고른 이용자(C2&middot;A2)</b>, I want <b>고른 제안 그대로 예약과 결제를 끝내기</b>,
+          so that <b>조건을 다시 입력하지 않고 결정이 그대로 실행된다</b>.</div>
+      </div>
+      <div class="sb">
+        <div class="ac">
+          <div><div class="id2">AC1</div><div class="body">
+            <span class="g">Given</span> 이용자가 제안 하나를 선택하고,
+            <span class="w">When</span> 예약 화면으로 넘어가면,
+            <span class="t">Then</span> 제안에 담긴 <b>인원&middot;메뉴 구성&middot;시간</b>이 자동 승계된다.
+            <span class="thr">재입력 필드 0개</span> <span class="thr">승계 누락률 &le; 0.5%</span></div></div>
+          <div><div class="id2">AC2</div><div class="body">
+            <span class="g">Given</span> 제안에 메뉴 구성이 포함되어 있고,
+            <span class="w">When</span> 이용자가 결제를 진행하면,
+            <span class="t">Then</span> <b>주문량 기준으로 금액이 산출</b>되고 매장에 확정이 통보된다.
+            <span class="thr">통보 지연 &le; 30s</span> <span class="thr">금액 산출 오류율 &le; 0.3%</span></div></div>
+          <div><div class="id2">AC3</div><div class="body">
+            <span class="g">Given</span> 이용자가 예약 2시간 전까지 취소하고,
+            <span class="w">When</span> 취소가 접수되면,
+            <span class="t">Then</span> 선결제 금액을 전액 환불하고 매장에 즉시 알린다.
+            <span class="thr">환불 처리 &le; 24h</span> <span class="thr">환불 실패율 &le; 0.5%</span></div></div>
+          <div><div class="id2">AC4</div><div class="body">
+            <span class="g">Given</span> 예약 시각이 지나고,
+            <span class="w">When</span> 방문 확인이 없으면,
+            <span class="t">Then</span> 노쇼로 기록하고 선결제 금액을 매장에 정산한다.
+            <span class="thr">선택 제안 노쇼율 &le; 5%</span> <span class="thr">오판정률 &le; 1%</span></div></div>
+        </div>
+        <p class="muted" style="margin-top:11px">결제가 흐름 안에 있으므로 <strong>별도 보증금을 걸어 전환율을 깎는 설계를 피합니다.</strong>
+          P5의 이중 손실 Pain은 &lsquo;보증&rsquo;이 아니라 <strong class="hlr">선결제</strong>로 해소됩니다.</p>
+      </div>
+    </div>
+
+    <div class="story">
+      <div class="sh" style="background:rgba(3,199,90,.08)">
+        <div class="id" style="color:#7fe8ab">US-5 &middot; F8 &middot; Could</div>
+        <div class="txt">As a <b>내 가게를 내 말로 알리고 싶은 사장(P5)</b>, I want <b>분위기&middot;강점&middot;서비스&middot;수용 조건을 미리 등록해 두기</b>,
+          so that <b>조건에 맞는 손님에게 내 가게의 강점이 그대로 전달된다</b>.</div>
+      </div>
+      <div class="sb">
+        <div class="ac">
+          <div><div class="id2">AC1</div><div class="body">
+            <span class="g">Given</span> 사장이 에이전트 콘솔에 접속하고,
+            <span class="w">When</span> 가게 프로필을 작성하면,
+            <span class="t">Then</span> <b>분위기&middot;강점&middot;제공 가능한 서비스&middot;수용 조건</b>을 항목별로 등록할 수 있다.
+            <span class="thr">설정 화면 &le; 3개</span> <span class="thr">필수 항목 &le; 5개</span></div></div>
+          <div><div class="id2">AC2</div><div class="body">
+            <span class="g">Given</span> 등록한 수용 조건(인원&middot;시간&middot;룸 등) 밖의 요청이 도착하고,
+            <span class="w">When</span> 시스템이 매칭을 시도하면,
+            <span class="t">Then</span> 해당 매장의 에이전트는 소환되지 않는다.
+            <span class="thr">부적합 소환률 &le; 5%</span> <span class="thr">알림 무시율 &le; 20%</span></div></div>
+          <div><div class="id2">AC3</div><div class="body">
+            <span class="g">Given</span> 프로필 작성이 완료되고,
+            <span class="w">When</span> 사장이 내용을 갱신하려 하면,
+            <span class="t">Then</span> 기존 항목을 <b>1회 클릭</b>으로 불러와 수정할 수 있다.
+            <span class="thr">프로필 갱신율 &ge; 70%</span> <span class="thr">월 제안 참여율 &ge; 60%</span></div></div>
+          <div><div class="id2">AC4</div><div class="body">
+            <span class="g">Given</span> 사장이 강점 문구를 입력하고,
+            <span class="w">When</span> 등록된 사실 속성으로 뒷받침되지 않는 표현이 포함되면,
+            <span class="t">Then</span> 해당 문구를 저장하지 않고 근거가 될 속성 등록을 안내한다.
+            <span class="thr">근거 없는 제안 문구 0건</span></div></div>
+        </div>
+        <p class="muted" style="margin-top:11px"><strong>할인폭을 넣는 칸이 아닙니다.</strong>
+          가격 흥정이나 입찰 경쟁이 없으므로 콘솔은 &ldquo;우리 가게는 이런 자리다&rdquo;를 적는 곳이고,
+          경쟁 축은 가격이 아니라 <strong class="hlr">적합도</strong>입니다.</p>
+      </div>
+    </div>
+
+    <div class="story">
+      <div class="sh" style="background:rgba(3,199,90,.08)">
+        <div class="id" style="color:#7fe8ab">US-6 &middot; F7 &middot; Could</div>
+        <div class="txt">As a <b>카테고리를 말한 이용자(C2&middot;C3&middot;A2)</b>, I want <b>조건에 맞는 매장 에이전트가 한 대화방에 모여 제안하기</b>,
+          so that <b>내가 찾아다니지 않고 받은 제안 중에서 고를 수 있다</b>.</div>
+      </div>
+      <div class="sb">
+        <div class="ac">
+          <div><div class="id2">AC1</div><div class="body">
+            <span class="g">Given</span> 이용자가 카테고리와 지역을 말하고,
+            <span class="w">When</span> 시스템이 후보를 고르면,
+            <span class="t">Then</span> 조건에 맞는 매장 에이전트를 <b>3&ndash;5곳</b> 소환해 하나의 대화방을 만든다.
+            <span class="thr">소환 수 3&ndash;5곳</span> <span class="thr">대화방 생성 p95 &le; 2,000ms</span></div></div>
+          <div><div class="id2">AC2</div><div class="body">
+            <span class="g">Given</span> 대화방이 형성되고,
+            <span class="w">When</span> 이용자가 예산&middot;인원&middot;상황을 적으면,
+            <span class="t">Then</span> 에이전트들이 <b>등록된 속성에 근거한 제안</b>을 보내고 카운트다운이 노출된다.
+            <span class="thr">180초 내 제안 &ge; 1건: 85%</span> <span class="thr">첫 제안 p50 &le; 60s</span></div></div>
+          <div><div class="id2">AC3</div><div class="body">
+            <span class="g">Given</span> 제안이 수집되고,
+            <span class="w">When</span> 제안을 정리해 보여 주면,
+            <span class="t">Then</span> <b>가격이 아니라 조건 적합도를 1순위</b>로 정렬하고 비교 축과 근거를 함께 표시한다.
+            <span class="thr">근거 표기율 100%</span> <span class="thr">가격 협상 기능 0건</span></div></div>
+          <div><div class="id2">AC4</div><div class="body">
+            <span class="g">Given</span> 180초가 지나고,
+            <span class="w">When</span> 유효 제안이 0건이면,
+            <span class="t">Then</span> 빈 화면 대신 <b>제안 없는 Top-3</b>로 되돌리고 그 사실을 알린다.
+            <span class="thr">빈 제안 화면 노출 0건</span></div></div>
+          <div><div class="id2">AC5</div><div class="body">
+            <span class="g">Given</span> 제안을 선택해 방문하고,
+            <span class="w">When</span> 현장에서 제안 내용이 적용되지 않으면,
+            <span class="t">Then</span> 이용자 신고로 불이행이 기록되고 해당 매장의 소환 가중치가 하향된다.
+            <span class="thr">제안 이행률 &ge; 95%</span> <span class="thr">신고 처리 &le; 48h</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 §4 기능 요구사항 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">&sect;4 FUNCTIONAL REQUIREMENTS</div>
+    <h2>MSCW 우선순위와 근거</h2>
+    <p class="lead" style="margin:14px 0 18px">
+      MVP 아홉 기능이 <strong>전부 중요도 高</strong>이므로 MSCW는 가치 크기가 아니라
+      <strong class="hlr">선행 의존성과 릴리스 단계</strong>로 갈랐습니다.
+      Must는 Phase 1 클로즈드 베타에, Could는 Phase 2 오픈 베타에 들어갑니다.
+    </p>
+
+    <div class="tscroll fm">
+      <table>
+        <thead><tr>
+          <th style="width:56px">코드</th><th style="width:172px">기능</th><th style="width:74px">MSCW</th>
+          <th style="width:74px">Phase</th><th style="width:150px">대안 대비 가치</th><th style="width:72px">KPI</th><th>우선순위 근거</th>
+        </tr></thead>
+        <tbody>
+          <tr><td><b>F1</b></td><td>속성&middot;dish 단위 공통 색인</td>
+            <td class="c"><span class="ms M">Must</span></td><td class="c">P1</td>
+            <td>조건 검색 성공률 <b>0% &rarr; 90%</b></td><td class="c">보조 2&middot;6</td>
+            <td>나머지 여덟 개가 이 위에 얹힙니다. 색인 단위는 스키마 결정이라 <b>나중에 바꾸면 전면 재색인</b></td></tr>
+          <tr><td><b>F2</b></td><td>인당 가격대 &middot; 메뉴 옵션 필터</td>
+            <td class="c"><span class="ms M">Must</span></td><td class="c">P1</td>
+            <td>가격 확인 노동 <b>4.2분 &rarr; 0초</b></td><td class="c">보조 5</td>
+            <td>DOS 1&middot;2위. 대중점평이 인당 평균가 규격화로 <b>수익성을 검증</b>한 축</td></tr>
+          <tr><td><b>F3</b></td><td>대표 메뉴 단위 추천</td>
+            <td class="c"><span class="ms M">Must</span></td><td class="c">P1</td>
+            <td>메뉴 질의 정답률 <b>0% &rarr; 92%</b></td><td class="c">보조 2&middot;3</td>
+            <td>DOS 3위. 점심 일상에서 매일 발생하고 <b>대체 수단이 존재하지 않음</b></td></tr>
+          <tr><td><b>F4</b></td><td>자연어 상황 검색</td>
+            <td class="c"><span class="ms M">Must</span></td><td class="c">P1</td>
+            <td>탐색 채널 <b>4개 &rarr; 1개</b></td><td class="c">보조 1</td>
+            <td>F1의 속성이 사용자에게 닿는 유일한 통로. 파싱 실패 시 <b>폴백 필터로 열화</b></td></tr>
+          <tr><td><b>F5</b></td><td>근거&middot;출처 표기 + 공유 카드</td>
+            <td class="c"><span class="ms M">Must</span></td><td class="c">P1</td>
+            <td>근거 표기율 <b>0% &rarr; 100%</b></td><td class="c">보조 4&middot;7</td>
+            <td>저난이도 &times; 고효과. C1&middot;C4&middot;E1&middot;N1 <b>네 페르소나가 독립적으로 같은 요구</b></td></tr>
+          <tr><td><b>F6</b></td><td>근거 있는 Top-3 제시</td>
+            <td class="c"><span class="ms M">Must</span></td><td class="c">P1</td>
+            <td>결정 시간 <b>&minus;20%</b> · 비교 축 정리</td><td class="c">보조 3 &middot; NS</td>
+            <td>후보를 몇 개로 보여 줄지는 <b>화면 설계 선택</b>이지 차별 축이 아닙니다. 값은 <b>비교 축과 근거를 미리 정리</b>해 고민할 양을 줄이는 데서 나옵니다</td></tr>
+          <tr style="background:rgba(255,176,46,.06)"><td><b>F9</b></td><td>선택과 예약 &middot; 결제</td>
+            <td class="c"><span class="ms S">Should</span></td><td class="c">P1 말</td>
+            <td>재입력 필드 <b>N개 &rarr; 0개</b> · 노쇼 <b>15% &rarr; 5%</b></td><td class="c">보조 10</td>
+            <td><b>F7&middot;F8의 선행 조건.</b> 제안에 인원&middot;메뉴가 담겨 있어 조건 재입력 없이 결제로 이어집니다. 선결제가 노쇼 손실을 흡수 &mdash; OpenTable이 노쇼 관리의 판매 가능성을 이미 증명</td></tr>
+          <tr style="background:rgba(63,208,232,.055)"><td><b>F8</b></td><td>매장 에이전트 콘솔</td>
+            <td class="c"><span class="ms C">Could</span></td><td class="c">P2</td>
+            <td>고정 광고비 <b>월 30만 &rarr; 0원</b></td><td class="c">보조 11</td>
+            <td><b>할인폭이 아니라 강점&middot;서비스&middot;수용 조건</b>을 등록하는 콘솔. 사장이 직접 조작하므로 <b>화면 수가 곧 이탈률</b>이라 설정 화면 3개 이하</td></tr>
+          <tr style="background:rgba(63,208,232,.055)"><td><b>F7</b></td><td>에이전트 소환 &middot; 단체 대화방</td>
+            <td class="c"><span class="ms C">Could</span></td><td class="c">P2</td>
+            <td>매장 에이전트 제안 <b>부재 &rarr; 상용</b></td><td class="c">보조 8&middot;9</td>
+            <td>사업 모델의 축이자 <b>경쟁사 일곱 곳 전부 부재</b>인 유일한 축. F1&middot;F6&middot;F8&middot;F9가 모두 선행</td></tr>
+          <tr style="opacity:.72"><td><b>F1a</b></td><td>알레르기&middot;성분 필드</td>
+            <td class="c"><span class="ms W">Won't</span></td><td class="c">필드만</td>
+            <td>&mdash;</td><td class="c">&mdash;</td>
+            <td>F1과 같은 자료구조라 <b>스키마 자리만 확보</b>. 등록 정보를 그대로 노출하고 판정하지 않음</td></tr>
+          <tr style="opacity:.72"><td><b>F1b</b></td><td>접근성 속성 필드</td>
+            <td class="c"><span class="ms W">Won't</span></td><td class="c">필드만</td>
+            <td>&mdash;</td><td class="c">&mdash;</td>
+            <td>입구 사진&middot;단차 필드만. <b>검증되지 않은 구간은 명시</b>하고 정확도를 약속하지 않음</td></tr>
+          <tr style="opacity:.55"><td>&mdash;</td><td>리뷰 3축 재가공</td>
+            <td class="c"><span class="ms W">Won't</span></td><td class="c">v0.2+</td>
+            <td>&mdash;</td><td class="c">&mdash;</td>
+            <td>Yelp의 음식점 광고 <b>&minus;6%</b>가 리뷰량 경쟁의 한계를 보여 줌</td></tr>
+          <tr style="opacity:.55"><td>&mdash;</td><td>다지점 공정 지점 산출</td>
+            <td class="c"><span class="ms W">Won't</span></td><td class="c">v0.2+</td>
+            <td>&mdash;</td><td class="c">&mdash;</td>
+            <td>v0.1은 <b>사용자가 지역을 직접 지정</b>. 경로 엔진 착수 시 접근성 가중치를 함께 설계</td></tr>
+          <tr style="opacity:.55"><td>&mdash;</td><td>AI 예약 에이전트</td>
+            <td class="c"><span class="ms W">Won't</span></td><td class="c">v0.2+</td>
+            <td>&mdash;</td><td class="c">&mdash;</td>
+            <td>해결이 <b>매장 응대라는 제3자 행동</b>에 달려 우리 코드로 품질을 보증할 수 없음</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cols w6" style="margin-top:16px">
+      <div class="card warn">
+        <div class="ttl">Must 여섯 개가 한 릴리스인 이유</div>
+        <p class="muted">F1&ndash;F6은 <strong>따로 출시하면 값이 나오지 않습니다.</strong>
+          색인만 있고 필터가 없으면 사용자에게 닿지 않고, 필터만 있고 근거가 없으면 경쟁사 화면과 같아집니다.
+          북극성 KPI가 <strong class="hlr">여섯 개를 통과한 세션만</strong> 집계하는 것도 같은 이유입니다.</p>
+      </div>
+      <div class="card cy">
+        <div class="ttl">Could 두 개의 게이트</div>
+        <p class="muted">F7&middot;F8은 <strong>세 조건이 충족될 때만</strong> 착수합니다. ① Phase 1의 북극성이 목표의 60% 이상, ② 가맹점 LOI 30곳 이상,
+          ③ <strong>P5의 &lsquo;대화방 제안 참여 의향&rsquo;이 실측으로 확인</strong>.
+          세 번째가 안 되면 에이전트 제안은 v0.2로 넘깁니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 §4 기능 의존성 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">&sect;4.2 FEATURE DEPENDENCY</div>
+    <h2>착수 순서를 정하는 의존성</h2>
+    <p class="lead" style="margin:14px 0 18px">
+      실선이 <strong>필수 선행</strong>, 점선이 <strong>품질 의존</strong>입니다.
+      F1과 F9가 병목이고, 이 둘이 밀리면 <strong class="hlr">각각 여섯 개와 두 개가 함께 밀립니다.</strong>
+    </p>
+
+    <div class="chart">
+<pre class="mermaid">
+flowchart LR
+    F1["F1 속성 · dish 공통 색인
+장소→메뉴→가격→속성→확인상태→확인일자"]:::base
+    F2["F2 인당 가격대 필터"]:::must
+    F3["F3 대표 메뉴 추천"]:::must
+    F4["F4 자연어 상황 검색"]:::must
+    F5["F5 근거 · 출처 표기"]:::must
+    F6["F6 근거 있는 Top-3"]:::must
+    F9["F9 선택 · 예약 · 결제"]:::should
+    F8["F8 매장 에이전트 콘솔"]:::could
+    F7["F7 에이전트 소환 · 대화방"]:::could
+    NS(["북극성
+WEBD"]):::ns
+    F1a["F1a 성분 필드"]:::wont
+    F1b["F1b 접근성 필드"]:::wont
+
+    F1 --&gt; F2
+    F1 --&gt; F3
+    F1 --&gt; F4
+    F1 --&gt; F5
+    F1 -.-&gt; F1a
+    F1 -.-&gt; F1b
+    F2 --&gt; F6
+    F3 --&gt; F6
+    F4 --&gt; F6
+    F5 --&gt; F6
+    F6 --&gt; NS
+    F9 --&gt; F8
+    F8 --&gt; F7
+    F1 --&gt; F7
+    F6 --&gt; F7
+    F7 --&gt; NS
+    F5 -.-&gt;|"제안 근거 문장"| F7
+    classDef base fill:#2b1414,stroke:#ff5d5d,color:#ffb3b3,font-weight:bold
+    classDef must fill:#2b1622,stroke:#ff7fb0,color:#ffd0e2
+    classDef should fill:#2a2211,stroke:#ffb02e,color:#ffd894
+    classDef could fill:#10241a,stroke:#03C75A,color:#9ff0c2
+    classDef ns fill:#16222a,stroke:#3fd0e8,color:#dff6fb,font-weight:bold
+    classDef wont fill:#1a1418,stroke:#5b4a52,color:#b3a4ab
+</pre>
+    </div>
+    <div class="cap">빨강이 전체의 선행(F1), 호박이 에이전트 제안의 선행(F9) &middot; 회색은 필드만 확보</div>
+
+    <div class="g3" style="margin-top:20px">
+      <div class="card warn">
+        <div class="k">병목 01</div>
+        <h3>F1 &mdash; 여섯 개가 대기</h3>
+        <p class="muted">색인 스키마가 확정되지 않으면 F2&ndash;F5를 착수할 수 없습니다.
+          <strong class="hlr">Sprint 0에서 스키마 리뷰를 끝내야</strong> 하고, 여기에 F1a&middot;F1b 필드를 함께 넣습니다.</p>
+      </div>
+      <div class="card amb">
+        <div class="k">병목 02</div>
+        <h3>F9 &mdash; 에이전트 제안의 관문</h3>
+        <p class="muted">선결제 없이 F7&middot;F8을 열면 첫 노쇼에서 매장이 이탈합니다.
+          결제 연동이 포함되므로 <strong>Phase 1 말에 착수</strong>해 Phase 2 시작 전에 안정화합니다.</p>
+      </div>
+      <div class="card cy">
+        <div class="k">품질 의존</div>
+        <h3>F5 &rarr; F7</h3>
+        <p class="muted">제안 카드에 <strong>&ldquo;왜 이 집이 이 제안을 했는지&rdquo;</strong>를 붙이지 않으면
+          N1이 지적한 대로 광고로 읽힙니다. F5의 문장 생성 로직을 에이전트 제안에 재사용합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 §5 NFR -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">&sect;5 NON-FUNCTIONAL REQUIREMENTS</div>
+    <h2>비기능 요구사항</h2>
+
+    <div class="nfr" style="margin-top:18px">
+      <div>
+        <h4>성능 (Performance)</h4>
+        <dl>
+          <dt>조건 파싱 + Top-3</dt><dd>p95 <b>&le; 1,000ms</b> / p99 <b>&le; 2,000ms</b></dd>
+          <dt>메뉴 색인 질의</dt><dd>p95 <b>&le; 400ms</b> (캐시 히트 시 &le; 120ms)</dd>
+          <dt>공유 카드 생성</dt><dd>p95 <b>&le; 3,000ms</b></dd>
+          <dt>첫 제안 도착</dt><dd>p50 <b>&le; 60s</b> / 마감 <b>180s</b> 고정</dd>
+          <dt>동시 세션</dt><dd>피크 <b>3,000 RPS</b>에서 위 목표 유지</dd>
+          <dt>모바일 초기 렌더</dt><dd>LCP <b>&le; 2.5s</b> (4G 기준)</dd>
+        </dl>
+      </div>
+      <div>
+        <h4>신뢰성 (Reliability)</h4>
+        <dl>
+          <dt>월 가용성</dt><dd><b>&ge; 99.5%</b> (월 다운타임 &le; 3시간 39분)</dd>
+          <dt>5xx 오류율</dt><dd><b>&le; 0.3%</b> / 결제 API <b>&le; 0.1%</b></dd>
+          <dt>조건 파싱 실패율</dt><dd><b>&le; 1.5%</b> 실패 시 폴백 필터로 열화</dd>
+          <dt>빈 결과 반환률</dt><dd><b>&le; 2%</b> 유사 메뉴 대체로 회피</dd>
+          <dt>데이터 신선도</dt><dd>가격&middot;속성 <b>90일</b> 초과 시 경고 표기 필수</dd>
+          <dt>복구 목표</dt><dd>RTO <b>&le; 30분</b> / RPO <b>&le; 5분</b></dd>
+        </dl>
+      </div>
+      <div>
+        <h4>보안 &middot; 개인정보 (Security)</h4>
+        <dl>
+          <dt>참석자 출발지</dt><dd>세션 종료 후 <b>30일 내 파기</b>. 목적 외 사용 금지</dd>
+          <dt>개인 제약 정보</dt><dd>식이&middot;이동 제약은 <b>본인 단말에만</b> 저장. 서버 전송 시 옵트인 필수</dd>
+          <dt>회식 참석자 정보</dt><dd>A2 인터뷰 반영 &mdash; <b>비고&middot;개인 취향 필드는 수집하지 않음</b></dd>
+          <dt>정산&middot;결제</dt><dd>PCI-DSS 준수 PG 위탁. 카드 정보 <b>비보관</b></dd>
+          <dt>저장 암호화</dt><dd>결제&middot;정산 데이터 <b>AES-256</b>, 전송 <b>TLS 1.3</b></dd>
+          <dt>접근 통제</dt><dd>가맹점 콘솔 <b>2FA</b>, 내부 조회 전량 감사 로그</dd>
+        </dl>
+      </div>
+      <div>
+        <h4>비용 &middot; 운영 (Cost)</h4>
+        <dl>
+          <dt>세션당 추론 비용</dt><dd><b>&le; 12원</b> (조건 파싱 + 근거 문장 생성)</dd>
+          <dt>캐시 히트율</dt><dd>속성&middot;메뉴 조회 <b>&ge; 70%</b></dd>
+          <dt>단위 경제</dt><dd>성사 1건당 수수료 &gt; 처리 비용 <b>&times; 3</b></dd>
+          <dt>제안 품질 심사</dt><dd>사람이 운영 &mdash; 가맹점 <b>150곳당 1 FTE</b> 상한</dd>
+          <dt>데이터 조달</dt><dd>외부 실시간 상태 API 도입 시 건당 단가를 <b>수수료의 15% 이하</b>로</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="h3" style="margin-top:20px"><em>5.5</em><b>모니터링 &mdash; 로그&middot;대시보드&middot;알림</b><span>임계 초과 시 자동 알림</span></div>
+    <div class="tscroll">
+      <table>
+        <thead><tr><th style="width:150px">항목</th><th style="width:210px">수집 방식</th><th style="width:130px">알림 임계</th><th style="width:96px">채널</th><th>대응</th></tr></thead>
+        <tbody>
+          <tr><td><b>조건 파싱 실패율</b></td><td>질의 로그 &middot; 5분 윈도</td><td>5분 &gt; <b>3%</b></td><td>Slack + PagerDuty</td><td>폴백 필터 강제 전환, 파서 모델 롤백</td></tr>
+          <tr><td><b>Top-3 p95 응답</b></td><td>APM 트레이스</td><td>10분 &gt; <b>1,500ms</b></td><td>Slack</td><td>캐시 워밍, 색인 샤드 확인</td></tr>
+          <tr><td><b>근거 표기 누락</b></td><td>렌더 이벤트 검증</td><td>1건 발생</td><td>Slack</td><td>해당 카드 노출 차단 &mdash; <b>표기 없는 후보는 내보내지 않음</b></td></tr>
+          <tr><td><b>빈 결과 반환률</b></td><td>질의 로그 &middot; 시간당</td><td>시간당 &gt; <b>4%</b></td><td>Slack</td><td>유사 메뉴 임계 완화, 색인 커버리지 점검</td></tr>
+          <tr style="background:rgba(255,127,176,.055)"><td><b>제안 도착률</b></td><td>대화방 형성 &rarr; 제안 매칭</td><td>일간 &lt; <b>70%</b></td><td>Slack + 가맹 영업</td><td>대상 매장 재선정, 알림 적합도 점검</td></tr>
+          <tr style="background:rgba(255,127,176,.055)"><td><b>선택 제안 노쇼율</b></td><td>방문 확인 &middot; 결제 매칭</td><td>주간 &gt; <b>8%</b></td><td>Slack + 경영 리포트</td><td><b>F7&middot;F8 신규 노출 중단</b>, 선결제 정책 재검토</td></tr>
+          <tr><td><b>세션당 추론 비용</b></td><td>토큰 사용량 집계</td><td>일간 &gt; <b>18원</b></td><td>Slack</td><td>프롬프트 축약, 캐시 정책 조정</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 11 §6 데이터·인터페이스 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">&sect;6 DATA &amp; INTERFACES</div>
+    <h2>핵심 엔터티와 API 개요</h2>
+    <p class="lead" style="margin:14px 0 16px">
+      F1의 공통 자료구조를 엔터티로 옮긴 것입니다. <strong class="hlr">Verification이 별도 엔터티</strong>인 것이 핵심 &mdash;
+      확인 상태&middot;일자&middot;주체를 속성마다 따로 붙이지 않으면 F5가 성립하지 않습니다.
+    </p>
+
+    <div class="cols w6">
+      <div class="chart" style="min-height:340px">
+<pre class="mermaid">
+erDiagram
+    PLACE ||--o{ DISH : serves
+    PLACE ||--o{ ATTRIBUTE : has
+    PLACE ||--|| PRICE_PROFILE : has
+    DISH ||--o{ ATTRIBUTE : has
+    ATTRIBUTE ||--|| VERIFICATION : verified_by
+    PRICE_PROFILE ||--|| VERIFICATION : verified_by
+    PLACE ||--o{ PROPOSAL : offers
+    AGENT_ROOM ||--o{ PROPOSAL : receives
+    PROPOSAL ||--o| RESERVATION : selected_as
+    RESERVATION ||--o| PAYMENT : settled_by
+    PLACE {
+        uuid id
+        string name
+        geo location
+        int seats
+        int max_party
+    }
+    DISH {
+        uuid id
+        string name
+        string canonical_key
+        int price
+    }
+    PRICE_PROFILE {
+        int per_person_avg
+        int per_person_low
+        int per_person_high
+        string condition_tags
+    }
+    ATTRIBUTE {
+        string key
+        string value
+        enum scope
+    }
+    VERIFICATION {
+        enum status
+        date verified_at
+        enum verified_by
+        string source_url
+    }
+    AGENT_ROOM {
+        uuid id
+        json conditions
+        int agent_count
+        timestamp expires_at
+    }
+    PROPOSAL {
+        string headline
+        json highlights
+        json services
+        timestamp submitted_at
+    }
+</pre>
+      </div>
+      <div>
+        <div class="h3"><em>6.2</em><b>주요 필드 규칙</b></div>
+        <div class="tscroll ent">
+          <table>
+            <thead><tr><th style="width:112px">엔터티</th><th style="width:150px">필수 필드</th><th>제약</th></tr></thead>
+            <tbody>
+              <tr><td><b>Dish</b></td><td><code>canonical_key</code></td>
+                <td>메뉴명 정규화 키. &lsquo;물냉면/평양냉면/냉면&rsquo;을 동일 키로 묶어 <b>C3-1의 정답률 92%</b>를 만듦</td></tr>
+              <tr><td><b>PriceProfile</b></td><td><code>per_person_low/high</code></td>
+                <td>단일 값 금지 &mdash; C2 인터뷰의 <b>&ldquo;범위로 나오면 믿을 것 같아요&rdquo;</b> 반영. 폭 &le; &plusmn;20%</td></tr>
+              <tr><td><b>Attribute</b></td><td><code>scope</code></td>
+                <td><code>place</code> / <code>dish</code> 구분. 성분(F1a)과 접근성(F1b) 필드를 <b>같은 테이블에 사전 확보</b></td></tr>
+              <tr><td><b>Verification</b></td><td><code>verified_at</code><br><code>verified_by</code></td>
+                <td><b>모든 노출 속성에 필수.</b> <code>verified_by</code>는 <code>owner</code>/<code>platform</code>/<code>user</code>.
+                  90일 초과 시 경고 표기</td></tr>
+              <tr><td><b>Proposal</b></td><td><code>highlights</code></td>
+                <td>등록된 Attribute를 참조하는 배열. <b>근거 없는 문구 저장 금지</b> &mdash; 가격 필드는 없습니다(흥정 미지원)</td></tr>
+              <tr><td><b>Payment</b></td><td><code>order_amount</code></td>
+                <td>선택된 제안의 <b>주문량 기준</b>으로 산출. 취소 시 24시간 내 전액 환불, 노쇼 시 매장 정산</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="h3" style="margin-top:20px"><em>6.3</em><b>API 개요</b><span>내부 5 &middot; 외부 3</span></div>
+    <div class="tscroll ent">
+      <table>
+        <thead><tr><th style="width:76px">구분</th><th style="width:210px">엔드포인트</th><th style="width:230px">입력</th><th style="width:210px">출력</th><th>제약</th></tr></thead>
+        <tbody>
+          <tr><td>내부</td><td><code>POST /v1/query</code></td>
+            <td>자연어 1줄 또는 구조화 조건, 지역, 인원</td>
+            <td>Top-3 (근거 문장 + Verification 포함)</td>
+            <td>p95 &le; 1,000ms &middot; 후보 <b>정확히 3개</b> &middot; 근거 없는 후보 반환 금지</td></tr>
+          <tr><td>내부</td><td><code>GET /v1/places/{id}/dishes</code></td>
+            <td>place id, canonical_key 필터</td><td>Dish 목록 + PriceProfile</td>
+            <td>p95 &le; 400ms &middot; 캐시 TTL 6시간</td></tr>
+          <tr><td>내부</td><td><code>POST /v1/share-cards</code></td>
+            <td>선택한 후보 id, 조건 요약</td><td>이미지 URL + 딥링크</td>
+            <td>p95 &le; 3,000ms &middot; 근거 4항목 누락 시 <b>400 반환</b></td></tr>
+          <tr style="background:rgba(255,127,176,.055)"><td>내부</td><td><code>POST /v1/agent-rooms</code></td>
+            <td>카테고리, 지역, 조건 json, 만료 180s</td><td>room id, 소환된 에이전트 수</td>
+            <td>소환 <b>3&ndash;5곳</b> &middot; 0곳이면 즉시 미개시 응답 &middot; 조건 2개 이상 필수</td></tr>
+          <tr style="background:rgba(255,127,176,.055)"><td>내부</td><td><code>POST /v1/proposals</code></td>
+            <td>room id, headline, highlights, services</td><td>수신 확인</td>
+            <td>등록 속성으로 뒷받침되지 않는 문구 <b>400 반환</b> &middot; <b>가격 협상 필드 없음</b></td></tr>
+          <tr><td>외부</td><td>PG &middot; 주문량 기반 결제</td><td>금액, 예약 id</td><td>승인/취소/환불 결과</td>
+            <td>오류율 &le; 0.1% &middot; 카드 정보 <b>비보관</b> &middot; 환불 &le; 24h</td></tr>
+          <tr><td>외부</td><td>지도&middot;경로 API</td><td>좌표, 시각</td><td>대중교통 소요시간</td>
+            <td><b>v0.1 미사용</b> 지역 직접 지정. v0.2에서 접근성 가중치와 함께 도입</td></tr>
+          <tr><td>외부</td><td>실시간 매장 상태(검토)</td><td>place id</td><td>대기&middot;좌석 상태</td>
+            <td>테이블링이 <b>외부 공급 사업자로 전환 중</b> 직접 수집 대신 제휴 검토. 단가 &le; 수수료의 15%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 12 §7 범위·리스크 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">&sect;7 SCOPE &middot; RISKS &middot; ASSUMPTIONS</div>
+    <h2>범위와 리스크</h2>
+
+    <div class="cols w6" style="margin-top:18px">
+      <div class="card accent">
+        <div class="ttl">In Scope &mdash; v0.1</div>
+        <ul class="ev grn">
+          <li><b>수요 측</b> 자연어&middot;구조화 조건 입력, 인당 가격대 필터, 메뉴 단위 검색, 상황 속성 필터, 근거&middot;확인 일자 표기, Top-3 반환, 공유 카드</li>
+          <li><b>공급 측</b> 매장 에이전트 콘솔(분위기&middot;강점&middot;서비스&middot;수용 조건), 에이전트 소환과 제안 수집, 주문량 기반 결제 &mdash; <b>Phase 2</b></li>
+          <li><b>데이터</b> 장소&middot;메뉴&middot;가격&middot;시설 속성&middot;확인 상태. 성분&middot;접근성은 <b>필드만</b> 확보</li>
+          <li><b>지역</b> 수도권 상권 3곳(Phase 1) &rarr; 5곳(Phase 2)</li>
+          <li><b>플랫폼</b> <b>네이버 지도 내 별도 탭</b>이 1차 유통 형태 &mdash; 새 앱 설치 없이 이미 쓰는 지도 안에서 진입. 독립 모바일 웹은 병행 경로, 네이티브 앱은 v0.2</li>
+        </ul>
+      </div>
+      <div class="card warn">
+        <div class="ttl">Out of Scope &mdash; v0.1</div>
+        <ul class="ev red">
+          <li><b>다지점 공정 지점 산출</b> 사용자가 지역을 직접 지정. 경로 API 미연동</li>
+          <li><b>리뷰 3축 재가공</b> 리뷰 수집&middot;분류 파이프라인 전체</li>
+          <li><b>AI 예약 에이전트</b> 전화 대행. 예약은 <b>기존 예약 채널 링크</b>로 연결</li>
+          <li><b>성분&middot;접근성 데이터 커버리지</b> 필드는 있으나 <b>전국 채우기를 목표로 하지 않음</b>. 검증 안 된 구간은 명시</li>
+          <li><b>광고 상품</b> 초기 모델에서 제외(KSF 02). 노출 순서를 판매하지 않음 &mdash; 차별 가치의 전제</li>
+          <li><b>결제&middot;정산 자체 구축</b> PG 위탁</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="h3" style="margin-top:22px"><em>7.2</em><b>리스크</b><span>영향도 &times; 발생 가능성</span></div>
+    <div class="cols" style="gap:16px">
+      <div>
+        <div class="risk">
+          <div class="rh"><em>R1</em><b>매장의 제안 참여가 목표에 미달</b><span class="hi">치명 &middot; 高</span></div>
+          <p>P5의 <b>&lsquo;대화방에서 자기 강점을 제안할 의향&rsquo;이 모의값</b>입니다. 매장이 프로필을 채우지 않거나 제안하지 않으면 F7&middot;F8과 차별 가치 03이 함께 무너지고, 대화방이 <b>참여 매장 없는 빈 화면</b>이 됩니다.</p>
+          <p class="mit">Phase 1 중 <b>가맹점 30곳 사전 인터뷰 + LOI</b> 확보를 F7 착수 게이트로 설정.
+            제안 도착률 70% 미달 시 에이전트 제안을 v0.2로 연기하고 탐색 기능만으로 출시</p>
+        </div>
+        <div class="risk">
+          <div class="rh"><em>R2</em><b>속성 데이터 커버리지 부족</b><span class="hi">치명 &middot; 高</span></div>
+          <p>F1의 스키마가 있어도 값이 비면 Top-3가 나오지 않습니다. 인당 가격&middot;대표 메뉴&middot;1인석 여부를
+            <b>상권당 최소 300곳</b>은 채워야 첫 결과가 성립합니다.</p>
+          <p class="mit">상권 3곳 집중(전국 확장 금지) &middot; 결제 데이터 기반 인당가 추정 &middot;
+            테이블링 등 <b>외부 실시간 상태 공급자 제휴 검토</b> &middot; 가맹 온보딩 시 필수 필드 5개로 제한</p>
+        </div>
+        <div class="risk">
+          <div class="rh"><em>R3</em><b>자연어 조건 파싱 정확도 미달</b><span class="md">중대 &middot; 中</span></div>
+          <p>F4가 실패하면 F1의 속성이 사용자에게 닿지 않습니다. 특히 &ldquo;조용히 혼밥&rdquo;처럼
+            <b>기준이 사람마다 다른 표현</b>의 해석 오류가 불일치 신고로 이어집니다.</p>
+          <p class="mit">파싱 실패 시 <b>구조화 필터 UI로 즉시 폴백</b>(빈 화면 금지) &middot;
+            애매한 조건은 <b>판정하지 않고 재료만 노출</b> &middot; 실패율 3% 초과 시 파서 롤백 자동화</p>
+        </div>
+      </div>
+      <div>
+        <div class="risk">
+          <div class="rh"><em>R4</em><b>선결제가 예약 전환을 떨어뜨림</b><span class="md">중대 &middot; 中</span></div>
+          <p>제안 선택 직후 결제를 요구하면 이용자 전환율이 하락합니다. 캐치테이블이
+            <b>&lsquo;0원 예약&rsquo;</b>을 내세운 시장에서 우리가 돈을 먼저 받는 구조가 됩니다.</p>
+          <p class="mit"><b>4인 이상 단체 제안에만</b> 선결제 적용 &middot; 취소 시 24시간 내 전액 환불 &middot;
+            A/B로 0원 대 선결제를 비교(E5)해 노쇼율과 전환율의 교환비를 실측</p>
+        </div>
+        <div class="risk">
+          <div class="rh"><em>R5</em><b>네이버가 경쟁자이면서 우리 유통 채널이다</b><span class="hi">치명 &middot; 中</span></div>
+          <p>네이버가 2026년 전략으로 <b>검색 이후의 실행(예약&middot;구매)까지 흡수</b>하겠다고 선언했습니다.
+            우리가 노리는 결정 구간과 겹치는데, 동시에 1차 유통 형태가 <b>네이버 지도 안의 탭</b>입니다.
+            탭 노출과 정책이 우리 손에 없고, 네이버가 같은 구간을 직접 만들면 <b>채널이 닫힙니다.</b></p>
+          <p class="mit">독립 진입 경로(모바일 웹 링크)를 <b>같은 스프린트에서 병행</b> 개발 &middot;
+            탭 유입 비율을 주간 추적해 80% 초과 시 독립 경로 투자 확대 &middot;
+            기능 경쟁을 피하고 <b>매장 에이전트 제안</b>으로 차별화 &middot; 상권 3곳에서 <b>깊이로 먼저 이기고</b> 확장</p>
+        </div>
+        <div class="risk">
+          <div class="rh"><em>R6</em><b>제안 품질 심사 비용이 선형 증가</b><span class="md">보통 &middot; 中</span></div>
+          <p>근거 없는 광고성 제안 문구를 사람이 심사하면 가맹점 수에 비례해 인력이 늘고,
+            느슨하게 하면 제안 카드가 광고로 변합니다.</p>
+          <p class="mit">가맹점 <b>150곳당 1 FTE</b> 상한을 NFR로 고정 &middot;
+            규칙 위반 자동 탐지 후 사람이 예외만 처리 &middot; 상한 초과 시 신규 가맹 온보딩 속도 조절</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cols w6" style="margin-top:18px">
+      <div class="card cy">
+        <div class="ttl">가정 (Assumptions)</div>
+        <ul class="ev cy">
+          <li><b>A1</b> 인당 예산 상한을 두는 이용자가 수도권 20&ndash;34세에서 과반이다 <span class="mono">미검증</span></li>
+          <li><b>A2</b> 매장은 자기 강점&middot;서비스를 대화방에서 제안할 의향이 있다 <span class="mono">미검증 &middot; R1</span></li>
+          <li><b>A3</b> 후보 3개는 목록 20개보다 선택률이 높다 <span class="mono">E3로 검증</span></li>
+          <li><b>A4</b> 근거 표기가 선택률과 재방문을 올린다 <span class="mono">E2로 검증</span></li>
+          <li><b>A5</b> 결제 데이터로 인당가를 &plusmn;20% 내로 추정할 수 있다 <span class="mono">미검증 &middot; R2</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="ttl">의존성 (Dependencies) &middot; ADR</div>
+        <ul class="ev">
+          <li><b>ADR-001</b> 색인 단위를 place가 아니라 <b>dish + attribute</b>로 결정 &mdash; 되돌리면 전면 재색인</li>
+          <li><b>ADR-002</b> Verification을 <b>별도 엔터티</b>로 분리 &mdash; F5의 전제</li>
+          <li><b>ADR-003</b> 후보 수를 <b>3개로 고정</b> 페이지네이션 미제공</li>
+          <li><b>ADR-004</b> v0.1은 광고 상품 <b>미도입</b> 차별 가치의 전제(KSF 02)</li>
+          <li><b>외부</b> PG 계약(주문량 기반 결제) &middot; 가맹 온보딩 인력 &middot; 상권 3곳 데이터 확보</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 §8 실험·롤아웃 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">&sect;8 EXPERIMENTS &middot; ROLLOUT &middot; MEASUREMENT</div>
+    <h2>실험 설계와 단계별 출시</h2>
+
+    <div class="chart" style="margin-top:16px;min-height:230px">
+<pre class="mermaid">
+flowchart LR
+    P0["Phase 0 · 내부 드라이런
+2주 · 상권 1곳 · 가맹 20곳
+기준선을 H → M 으로 전환"]:::p0
+    G0{"게이트 0
+파싱 실패율 ≤ 3%
+Top-3 p95 ≤ 1.5s"}:::gate
+    P1["Phase 1 · 클로즈드 베타
+8주 · 상권 3곳 · 가맹 150곳 · 사용자 500
+Must F1–F6 + Should F9"]:::p1
+    G1{"게이트 1
+WEBD ≥ 목표 60%
+불일치 신고 ≤ 15%
+가맹 LOI ≥ 30곳"}:::gate
+    P2["Phase 2 · 오픈 베타
+8주 · 상권 5곳
+Could F7 · F8 에이전트 제안 개시"]:::p2
+    G2{"게이트 2
+제안 도착 ≥ 70%
+선택 제안 노쇼 ≤ 8%"}:::gate
+    GA["GA · v1.0"]:::ga
+    HOLD["에이전트 제안 v0.2 연기
+탐색 기능만 GA"]:::hold
+
+    P0 --&gt; G0 --&gt;|통과| P1
+    G0 --&gt;|미달| P0
+    P1 --&gt; G1 --&gt;|통과| P2
+    G1 --&gt;|LOI 미달| HOLD
+    P2 --&gt; G2 --&gt;|통과| GA
+    G2 --&gt;|노쇼 초과| HOLD
+    classDef p0 fill:#1a1418,stroke:#8d7d84,color:#d9cfd4
+    classDef p1 fill:#2b1622,stroke:#ff7fb0,color:#ffd0e2
+    classDef p2 fill:#10241a,stroke:#03C75A,color:#9ff0c2
+    classDef gate fill:#2a2211,stroke:#ffb02e,color:#ffd894
+    classDef ga fill:#16222a,stroke:#3fd0e8,color:#dff6fb
+    classDef hold fill:#2b1414,stroke:#ff5d5d,color:#ffb3b3
+</pre>
+    </div>
+    <div class="cap">게이트 1의 &lsquo;가맹 LOI 30곳&rsquo;이 R1의 완화 장치 &mdash; 미달 시 에이전트 제안을 열지 않고 탐색만 GA</div>
+
+    <div class="tscroll" style="margin-top:20px">
+      <table>
+        <thead><tr>
+          <th style="width:52px">ID</th><th style="width:180px">가설</th><th style="width:190px">실험 설계</th>
+          <th style="width:190px">측정 도구 &middot; KPI</th><th style="width:150px">성공 기준</th><th>Phase</th>
+        </tr></thead>
+        <tbody>
+          <tr><td><b>E1</b></td><td>자연어 단일창이 3필드 입력보다 완료율이 높다</td>
+            <td>A/B 테스트 <b>n=500</b> 세션, 50:50 무작위 배정, 2주</td>
+            <td>이벤트 로그 &mdash; 조건 입력 완료율, 첫 결과 p95, 파싱 실패율</td>
+            <td>완료율 <b>+10pp 이상</b> &amp; p95 &le; 1,000ms</td><td>P1</td></tr>
+          <tr><td><b>E2</b></td><td>근거 표기가 Top-3 내 선택률을 올린다</td>
+            <td>A/B <b>n=800</b> 세션, 근거 유/무 2군, 3주</td>
+            <td>이벤트 로그 + 7일 재방문율. KPI &mdash; 선택률, 공유 카드 생성률</td>
+            <td>선택률 <b>+8pp 이상</b> &amp; 재방문 <b>+5pp</b></td><td>P1</td></tr>
+          <tr><td><b>E3</b></td><td>후보 3개가 5개보다 선택률과 결정 시간에서 낫다</td>
+            <td>A/B <b>n=600</b> 세션, 3개 vs 5개, 2주</td>
+            <td>이벤트 로그 &mdash; 선택률, 조건 입력&rarr;선택 소요 시간(초)</td>
+            <td>선택률 동등 이상 &amp; 결정 시간 <b>&minus;20%</b></td><td>P1</td></tr>
+          <tr><td><b>E4</b></td><td>예상가를 범위로 표기하면 신뢰도가 올라간다</td>
+            <td>A/B <b>n=400</b>, 단일값 vs 범위. 방문 후 5점 척도 설문 병행</td>
+            <td>설문(5점) + 결제액 편차 로그 &mdash; 오차 &plusmn;10% 내 비율</td>
+            <td>신뢰도 <b>&ge; 4.0/5</b> &amp; &plusmn;10% 내 <b>80%</b></td><td>P1</td></tr>
+          <tr style="background:rgba(255,127,176,.055)"><td><b>E5</b></td><td>선결제가 노쇼를 줄이되 전환을 크게 깎지 않는다</td>
+            <td>A/B <b>n=300</b> 단체 제안, 0원 vs 주문량 기반 선결제, 4주</td>
+            <td>예약&middot;방문 매칭 로그 &mdash; 노쇼율, 예약 전환율</td>
+            <td>노쇼 <b>&le; 5%</b> &amp; 전환 하락 <b>&le; 5pp</b></td><td>P2</td></tr>
+          <tr style="background:rgba(255,127,176,.055)"><td><b>E6</b></td><td>제안 마감 180초가 90초보다 제안 도착률이 높다</td>
+            <td>A/B <b>n=300</b> 요청, 90s vs 180s, 3주</td>
+            <td>대화방&middot;제안 로그 &mdash; 도착률, 이용자 이탈률</td>
+            <td>도착률 <b>&ge; 85%</b> &amp; 대기 중 이탈 <b>&le; 15%</b></td><td>P2</td></tr>
+          <tr><td><b>E7</b></td><td>동일 과업에서 우리가 기존 대안보다 빠르다</td>
+            <td><b>벤치마크</b> 동일 조건 과업 10건을 네이버플레이스&middot;카카오맵&middot;캐치테이블에서 수동 수행.
+              평가자 2명 교차, 총 <b>n=60</b> 시행</td>
+            <td>스톱워치 + 화면 녹화 &mdash; 소요 시간, 사용 채널 수, 근거 표기 유무</td>
+            <td>소요 <b>1/10 이하</b> &amp; 채널 <b>4&rarr;1</b> &amp; 근거 표기 <b>0&rarr;100%</b></td><td>P0&ndash;P1</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cols w6" style="margin-top:18px">
+      <div class="card warn">
+        <div class="ttl">차별 가치의 수치 검증 &mdash; E7이 핵심</div>
+        <p class="muted">&ldquo;대안 대비 10배&rdquo;는 주장이 아니라 <strong>측정 대상</strong>입니다.
+          E7은 같은 과업(&ldquo;인당 2만원 이하, 평양냉면, 혼자&rdquo;)을 세 경쟁 플랫폼에서 사람이 직접 수행해
+          <strong class="hlr">소요 시간 12분 &rarr; 60초(12배), 채널 4개 &rarr; 1개(4배)</strong>를 실증합니다.
+          벤치마크가 실패하면 차별 가치 주장을 문서에서 내립니다.</p>
+      </div>
+      <div class="card cy">
+        <div class="ttl">실험 운영 규칙</div>
+        <ul class="ev cy">
+          <li><b>동시 실험 2개 이하</b> 상권 3곳 규모에서 3개 이상은 표본이 갈려 유의성이 안 나옵니다</li>
+          <li><b>노쇼 관련 실험은 게이트와 연동</b> E5에서 노쇼 8% 초과 시 즉시 중단하고 F7&middot;F8 노출 정지</li>
+          <li><b>기준선 갱신</b> Phase 0 종료 시 <span class="mono">H</span> 기준선을 전량 <span class="mono">M</span>으로 교체하고 목표값 재설정</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 14 §9 Proof -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">&sect;9 PROOF</div>
+    <h2>근거와 검증 체계</h2>
+    <p class="lead" style="margin:14px 0 18px">
+      두 방향으로 나눴습니다. 왼쪽은 <strong>이미 확보한 근거</strong>(인터뷰&middot;벤치마크&middot;시장 통계),
+      오른쪽은 <strong class="hlr">출시 후 세울 측정 체계</strong>(행동 감지&middot;통계 추출&middot;KPI&middot;실험).
+      왼쪽의 대부분이 <span class="mono">H</span> 가설이므로, 이 문서의 실질 산출물은 오른쪽입니다.
+    </p>
+
+    <div class="cols" style="gap:20px">
+      <div>
+        <div class="h3"><em>방향 1</em><b>확보한 근거</b><span>가설 &middot; 외부 자료</span></div>
+        <div class="sec" style="margin-bottom:12px">
+          <div class="sh2"><em>인터뷰</em><b>모의 JTBD 11건</b><span>실제 인터뷰 0건</span></div>
+          <div class="sb2">
+            <ul class="ev" style="gap:8px">
+              <li><b>C2</b> &ldquo;메뉴판 사진 확대해서 더하기를 해요&rdquo; &middot; &ldquo;범위로 나오면 믿을 것 같아요&rdquo; &rarr; F2의 <code>per_person_low/high</code></li>
+              <li><b>C3</b> &ldquo;인스타, 블로그, 동료 &mdash; 채널이 네 개예요. 십이 분쯤&rdquo; &rarr; 실패 KPI 기준선</li>
+              <li><b>C4</b> &ldquo;사진이랑 1인석 개수가 같이 나오면 제가 판단할 수 있어요&rdquo; &rarr; F5의 판정 금지 원칙</li>
+              <li><b>E1</b> &ldquo;등록해 놓은 건 기록이잖아요&rdquo; &rarr; F1a는 <b>필드만, 판정 없이</b></li>
+              <li><b>P5</b> &ldquo;광고 영업 오면 저는 듣기만 하잖아요. 이건 내가 조건을 거는 거네요&rdquo; &rarr; F8의 자기 소개 콘솔.
+                <b class="hlr">에이전트 제안 모델이 이 한 발화에 걸려 있고 모의값</b></li>
+              <li><b>P5</b> &ldquo;노쇼 한 번이면 끝이에요&rdquo; &rarr; F9를 F7&middot;F8보다 앞에 배치한 근거</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sec" style="margin-bottom:0">
+          <div class="sh2"><em>시장 통계</em><b>공개 자료 &middot; 1차 출처 검증</b><span>2025 실적 기준</span></div>
+          <div class="sb2">
+            <ul class="ev" style="gap:8px">
+              <li><b>노출 판매 모델의 정체</b> 네이버 서치플랫폼 4Q <b>&minus;0.5%</b> vs 커머스 <b>+36%</b>
+                <div class="srcs"><a href="https://navercorp.com/media/pressReleasesDetail?seq=34325" target="_blank" rel="noopener">NAVER 2025 4Q&middot;연간 실적 발표</a></div></li>
+              <li><b>리뷰량 경로의 한계</b> Yelp 음식점&middot;소매 광고 <b>&minus;6%</b>($4.44억), 누적 리뷰 3.3억건
+                <div class="srcs"><a href="https://www.yelp-ir.com/news/press-releases/news-release-details/2026/Yelp-Delivers-Record-Net-Revenue-in-2025-Accelerating-Investment-in-AI-Transformation/default.aspx" target="_blank" rel="noopener">Yelp IR 2025 실적</a><a href="https://www.sec.gov/Archives/edgar/data/1345016/000134501626000019/yelp-20251231.htm" target="_blank" rel="noopener">SEC Form 10-K FY2025</a></div></li>
+              <li><b>가격 규격화의 수익성</b> 메이투안 핵심 로컬커머스 <b>RMB 2,502억</b>(+20.9%), &lsquo;가성비&rsquo; 공식 전략
+                <div class="srcs"><a href="https://www.scmp.com/tech/tech-trends/article/3276267/meituan-reports-robust-revenue-profit-growth-second-quarter-value-money-approach" target="_blank" rel="noopener">SCMP &mdash; value for money 전략</a></div></li>
+              <li><b>노쇼 관리의 판매 가능성</b> OpenTable &mdash; 예약 고객이 워크인보다 인당 <b>23% 더 지출</b>, 노쇼율 낮음
+                <div class="srcs"><a href="https://www.opentable.com/restaurant-solutions/diner-network/" target="_blank" rel="noopener">OpenTable Diner Network</a></div></li>
+              <li><b>예약 SaaS의 커버리지 경쟁</b> 캐치테이블 가맹 <b>7,000&ndash;8,000곳</b>, 매출 성장 속 영업적자 유지
+                <div class="srcs"><a href="https://www.mt.co.kr/future/2025/04/04/2025040310345676753" target="_blank" rel="noopener">머니투데이 &mdash; 매출 2배, 적자 지속</a></div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="h3"><em>방향 2</em><b>수립할 측정 체계</b><span>출시 후 &middot; 이 문서의 실질 산출물</span></div>
+        <div class="sec" style="margin-bottom:12px">
+          <div class="sh2" style="background:rgba(3,199,90,.09)"><em style="background:rgba(3,199,90,.16);color:#7fe8ab">행동 감지</em><b>수집할 이벤트</b><span>Phase 0부터</span></div>
+          <div class="sb2">
+            <ul class="ev grn" style="gap:8px">
+              <li><b>조건 입력</b> 입력 시작&middot;필드별 확정&middot;중단 지점&middot;파싱 성공 여부 &mdash; C2의 &lsquo;네 번째 조건부터 포기&rsquo;를 로그로 확인</li>
+              <li><b>후보 소비</b> Top-3 렌더 시각, 카드별 체류&middot;확장, 선택 또는 이탈 &mdash; 선택률과 결정 시간</li>
+              <li><b>근거 상호작용</b> 근거 문장 확장률, 확인 일자 확인율, 공유 카드 생성&middot;전송</li>
+              <li><b>방문 후</b> 결제액 입력, 조건 불일치 신고, 재방문 여부(7&middot;30일)</li>
+              <li><b>공급 측</b> 소환 수신&middot;열람&middot;제안&middot;무시, 프로필 항목 변경&middot;갱신, 노쇼 발생</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sec" style="margin-bottom:12px">
+          <div class="sh2" style="background:rgba(63,208,232,.08)"><em style="background:rgba(63,208,232,.16);color:#96e8f5">통계 추출</em><b>주간 리포트 항목</b><span>대시보드</span></div>
+          <div class="sb2">
+            <ul class="ev cy" style="gap:8px">
+              <li><b>퍼널</b> 진입 &rarr; 조건 확정 &rarr; Top-3 수신 &rarr; 선택 &rarr; 방문 확인. 단계별 이탈률</li>
+              <li><b>커버리지</b> 상권별 필수 필드 5개 충족 매장 수 / 목표 300곳 (R2 추적)</li>
+              <li><b>신선도</b> 90일 초과 속성 비율, 재확인 처리 대기 건수</li>
+              <li><b>공급</b> 활성 가맹점, 월 제안 참여율, 제안 도착률, 노쇼율, 제안 이행률</li>
+              <li><b>단위 경제</b> 세션당 추론 비용, 성사당 수수료 대 처리 비용 배수</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card rose">
+          <div class="ttl">이 문서의 검증 순서</div>
+          <p class="muted"><strong>① Phase 0에서 기준선 전환</strong> <span class="mono">H</span> 아홉 개를 <span class="mono">M</span>으로 교체.
+            여기서 목표값이 크게 틀리면 KPI 표를 먼저 고칩니다.<br>
+            <strong>② E7 벤치마크</strong> 차별 가치의 배수 주장을 실증하거나 내립니다.<br>
+            <strong>③ 가맹점 30곳 실측</strong> A2 가정(20% 할인 여력)이 깨지면 F7&middot;F8을 v0.2로 연기합니다.<br>
+            <strong class="hlr">셋 중 ③이 최우선입니다.</strong> 나머지 둘은 제품을 고치는 문제이고, ③은 <strong>사업 모델이 성립하는지</strong>의 문제입니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="muted" style="margin-top:20px;text-align:center">
+      PRD v0.1 &middot; Owner 5팀 &middot; 2026-08-20 &middot; 상위 문서:
+      <a class="xlink" href="../VPS/ai-place-competitor-value-proposition_opus5-1m_high.html">경쟁사 분석 &amp; Value Proposition</a> &middot;
+      <a class="xlink" href="../JTBD/ai-place-jtbd-interview-deck.html">JTBD 인터뷰</a> &middot;
+      <a class="xlink" href="../OS/ai-place-opportunity-score-deck.html">AOS</a> &middot;
+      <a class="xlink" href="../OS/ai-place-dos-market-weighted-deck.html">DOS</a> &middot;
+      <a class="xlink" href="../CJM/ai-place-customer-journey-map-deck.html">고객 여정 지도</a> &middot;
+      <a class="xlink" href="../Persona/ai-place-persona-spectrum-deck.html">페르소나 스펙트럼</a>
+    </p>
+  </div>
+</section>
+
+<!-- 부록 · 문서 간 기준 대장 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">APPENDIX &middot; CROSS-DECK REGISTRY</div>
+    <h2>문서 간 기준 통일 &mdash; 페르소나 수와 수치 출처</h2>
+    <p class="lead" style="margin:13px 0 18px">
+      덱이 열한 개로 늘면서 같은 사람과 같은 값이 자리마다 다르게 불리기 시작했습니다.
+      스펙트럼 12명, AOS&middot;DOS 13인, CJM 13장, JTBD 인터뷰 11명은 서로 다른 집단이 아니라
+      <strong>같은 사람들을 다른 층에서 센 결과</strong>입니다. 어느 층을 세는지와 누가 그 수를 만들었는지를 여기서 못박아 둡니다.
+    </p>
+
+    <div class="xg">
+      <div class="xwrap">
+        <div class="xcap">① 페르소나 계보 &middot; 층마다 인원이 다른 이유</div>
+        <table class="xtb">
+          <thead><tr><th>층</th><th class="xn">인원</th><th>구성</th><th>이 수를 쓰는 곳</th></tr></thead>
+          <tbody>
+            <tr><td><b>1차 유형</b></td><td class="xn"><span class="xk c">6인</span></td>
+              <td>P1 다지점 조율형 &middot; P2 예산 상한형 &middot; P3 메뉴 지목형 &middot; P4 위생 확인형 &middot; <b>P5 로컬 사장(공급 측)</b> &middot; P6 단골 고정형</td>
+              <td>페르소나 덱 &#9312;단계</td></tr>
+            <tr><td><b>수요 측 스펙트럼</b></td><td class="xn"><span class="xk c">12인</span></td>
+              <td>핵심 C1&ndash;C5 &middot; 확장 A1&ndash;A3 &middot; 극단 E1&ndash;E2 &middot; 비활성 N1&ndash;N2</td>
+              <td>페르소나 덱 &#9313;단계 &middot; CJM 수요 측 12장</td></tr>
+            <tr><td><b>분석 모집단</b></td><td class="xn"><span class="xk b">13인</span></td>
+              <td>수요 측 12인 + 공급 측 P5</td>
+              <td>CJM 13장(수요 12 + 공급 1) &middot; AOS 39건 &middot; DOS 39건 = 13&times;3</td></tr>
+            <tr><td><b>인터뷰 실시</b></td><td class="xn"><span class="xk a">11명</span></td>
+              <td>모집단 13인에서 N1&middot;N2 제외</td>
+              <td>JTBD 트랜스크립트 11편</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="x2">
+        <div class="xbox az">
+          <h4>왜 인터뷰만 11명인가</h4>
+          <p>N1&middot;N2는 지금 이 문제를 겪지 않는 사람들입니다. 겪지 않은 일을 회상하게 하면 인터뷰가 창작으로 바뀌므로
+            두 사람은 <strong>진입 조건을 정의하는 자리</strong>에만 씁니다. 대상이 줄어든 것이지 모집단이 줄어든 것은 아닙니다.</p>
+        </div>
+        <div class="xbox">
+          <h4>표기 규칙</h4>
+          <p>본문에 &lsquo;페르소나 N인&rsquo;이라고 쓸 때는 <strong>어느 층인지 함께 적습니다.</strong>
+            층을 밝히지 않은 12와 13과 11은 읽는 사람에게 세 개의 다른 모집단으로 보입니다.
+            수요 측만 셀 때는 &lsquo;수요 측 12인&rsquo;, 공급 측을 포함할 때는 &lsquo;모집단 13인&rsquo;으로 씁니다.</p>
+        </div>
+      </div>
+
+      <div class="xwrap">
+        <div class="xcap">② 교차 인용 수치 대장 &middot; 값을 만든 자리는 PRD 하나뿐</div>
+        <table class="xtb">
+          <thead><tr><th>값</th><th>무엇을 재는가</th><th>상태</th><th>어떻게 나온 값인가</th><th>최초 출처</th></tr></thead>
+          <tbody>
+            <tr><td class="xn"><b>4.2분</b></td><td>인당 가격을 확인하는 데 드는 시간</td>
+              <td><span class="xk a">가설</span></td><td>리뷰&middot;블로그를 거치는 탐색 단계 수에서 역산</td><td>PRD v0.1 &sect;1.3 보조 5</td></tr>
+            <tr><td class="xn"><b>정답률 92%</b></td><td>dish 질의에 정답을 돌려주는 비율</td>
+              <td><span class="xk b">목표</span> 기준선 0%</td><td>메뉴명 정규화 키를 적용한 뒤의 목표치</td><td>PRD v0.1 &sect;3 US-3 &middot; &sect;6</td></tr>
+            <tr><td class="xn"><b>노쇼율 15% &rarr; 5%</b></td><td>단체 예약이 방문으로 이어지지 않는 비율</td>
+              <td><span class="xk a">15% 가설</span> <span class="xk b">5% 목표</span></td><td>선결제가 노쇼를 흡수한다는 가정</td><td>PRD v0.1 &sect;1.3 &middot; &sect;3 US-4 AC4</td></tr>
+            <tr><td class="xn"><b>WEBD 5,000건/주</b></td><td>근거를 보고 결정을 끝낸 주간 건수</td>
+              <td><span class="xk b">목표</span></td><td>북극성 KPI 정의</td><td>PRD v0.1 &sect;1.3</td></tr>
+            <tr><td class="xn"><b>첫 결과 p95 &le; 1,000ms</b></td><td>Top-3가 화면에 도착하는 시간</td>
+              <td><span class="xk b">목표</span></td><td>NFR 성능 예산. 롤아웃 게이트는 별도로 1.5s를 씁니다</td><td>PRD v0.1 &sect;5</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="x3">
+        <div class="xbox rz">
+          <h4>인용 규칙</h4>
+          <p>다섯 값은 전부 <strong>PRD가 만들었습니다.</strong> JTBD&middot;CJM&middot;AOS&middot;DOS에는 원래 없는 수입니다.
+            다른 덱에서 쓸 때는 PRD 출처를 함께 적고, 그 덱이 관찰한 결과처럼 쓰지 않습니다.
+            인터뷰와 세션 로그가 쌓이기 전까지 상태 칸은 <strong>가설과 목표</strong>로 남습니다.</p>
+        </div>
+        <div class="xbox cz">
+          <h4>코드 이름이 겹치는 자리</h4>
+          <p><b>Q1&ndash;Q4</b>는 AOS에서 기회 사분면이고 TAM-SAM-SOM 덱에서는 시장 사분면입니다.
+            <b>C1&ndash;C5</b>는 페르소나 핵심 5인이면서 가치사슬 덱 다이어그램의 노드 이름으로도 쓰입니다.
+            TAM-SAM-SOM 덱의 <b>S5 로컬 사업주</b>와 페르소나 <b>P5 로컬 사장</b>은 같은 사람입니다.
+            코드를 인용할 때는 어느 덱의 코드인지 붙입니다.</p>
+        </div>
+        <div class="xbox gz">
+          <h4>이 덱의 자리</h4>
+<p>위 대장의 <strong>다섯 값을 만든 덱</strong>입니다. 값이 바뀌면 여기서 고치고 다른 덱은 인용만 갱신합니다.
+            페르소나 인원은 이 덱이 정하지 않고 페르소나 덱과 CJM의 정의를 받습니다.</p>
+        </div>
+      </div>
+
+      <div class="xbox" style="border-color:rgba(255,255,255,.2)">
+        <p style="font-size:13px;color:#dbe8ee">수를 <strong>만드는 자리</strong>와 <strong>인용하는 자리</strong>를 갈라 두는 것이 이 표의 목적입니다.
+          값이 바뀌면 PRD에서 고치고 나머지 덱은 인용만 갱신합니다. 가설을 관찰로 올리는 일은 인터뷰와 로그가 실제로 쌓인 뒤에 합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="hud">
+  <span><kbd>&#8592;</kbd><kbd>Backspace</kbd> 이전</span>
+  <span><kbd>&#8594;</kbd><kbd>Space</kbd> 다음</span>
+  <button class="navbtn" id="prev" aria-label="이전">&#8592;</button>
+  <button class="navbtn" id="next" aria-label="다음">&#8594;</button>
+  <span class="counter"><b id="cur">1</b> / <span id="tot">15</span></span>
+</div>
+
+<script>
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var i = 0;
+  document.getElementById('tot').textContent = slides.length;
+
+  function animate(el){
+    el.querySelectorAll('[data-w]').forEach(function(f){
+      f.style.width = '0';
+      setTimeout(function(){ f.style.width = f.getAttribute('data-w'); }, 110);
+    });
+  }
+  function show(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function(s, k){ s.classList.toggle('on', k === i); });
+    document.getElementById('bar').style.width = ((i + 1) / slides.length * 100) + '%';
+    document.getElementById('cur').textContent = i + 1;
+    slides[i].scrollTop = 0;
+    animate(slides[i]);
+    if (location.hash !== '#' + (i + 1)) history.replaceState(null, '', '#' + (i + 1));
+  }
+  document.addEventListener('keydown', function(e){
+    var k = e.key;
+    if (k === 'ArrowRight' || k === ' ' || k === 'Spacebar' || k === 'PageDown'){ e.preventDefault(); show(i + 1); }
+    else if (k === 'ArrowLeft' || k === 'Backspace' || k === 'PageUp'){ e.preventDefault(); show(i - 1); }
+    else if (k === 'Home'){ e.preventDefault(); show(0); }
+    else if (k === 'End'){ e.preventDefault(); show(slides.length - 1); }
+  });
+  document.getElementById('next').addEventListener('click', function(){ show(i + 1); });
+  document.getElementById('prev').addEventListener('click', function(){ show(i - 1); });
+
+  var start = parseInt((location.hash || '').replace('#',''), 10);
+  show(isNaN(start) ? 0 : start - 1);
+</script>
+
+<script type="module">
+  try {
+    const { default: mermaid } = await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs');
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      securityLevel: 'loose',
+      fontFamily: '"Noto Sans KR","Malgun Gothic",sans-serif',
+      themeVariables: {
+        background: 'transparent',
+        primaryColor: '#16222a',
+        primaryTextColor: '#e9f1ee',
+        primaryBorderColor: '#ff7fb0',
+        lineColor: '#6f8480',
+        secondaryColor: '#121b20',
+        tertiaryColor: '#0e1519',
+        clusterBkg: 'rgba(255,255,255,.03)',
+        clusterBorder: 'rgba(255,255,255,.14)',
+        edgeLabelBackground: '#0e1519',
+        fontSize: '13px'
+      },
+      flowchart: { curve: 'basis', nodeSpacing: 28, rankSpacing: 44, padding: 10, useMaxWidth: true }
+    });
+    await mermaid.run({ querySelector: 'pre.mermaid' });
+  } catch (err) {
+    document.querySelectorAll('pre.mermaid').forEach(function(p){
+      p.style.textAlign = 'left';
+      p.style.fontFamily = 'ui-monospace,Consolas,monospace';
+      p.insertAdjacentHTML('beforebegin',
+        '<div class="cap" style="text-align:left;margin:0 0 8px">머메이드 렌더링 실패 &mdash; 네트워크 연결 후 새로고침하면 도식으로 표시됩니다. 아래는 원본 정의입니다.</div>');
+    });
+  }
+</script>
+
+</body>
+</html>
