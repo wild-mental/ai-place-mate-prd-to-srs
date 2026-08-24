@@ -143,7 +143,7 @@ MD에만 있는 토큰(추가)   179개
 
 ## 7. SRS 변환 결과
 
-`docs/[SRS 문서] AI-Place-Mate (한글).md` — 694줄 · 표 29개 · REQ-FUNC 10건 · REQ-NF 15건.
+`docs/[SRS 문서] AI-Place-Mate (한글).md` — 782줄 · 표 36개 · REQ-FUNC 10건 · REQ-NF 15건.
 
 ### 1–7장 — 예시 양식 준수
 
@@ -157,7 +157,7 @@ PRD가 이미 확정했으나 예시 양식에 대응 절이 없는 내용만, �
 | --- | --- | --- |
 | 8. 사용자 특성 | §9.6.6 User characteristics | 페르소나 |
 | 9. 수용 기준 명세 | §9.6.10 d) Specified requirements | US-1 ~ US-6 |
-| 10. 검증 및 확인 계획 | §9.6.19 Verification | KPI · 실험 · 릴리스 게이트 |
+| 10. 검증 및 확인 계획 | §9.6.19 Verification | KPI · 계측 계획 · 릴리스 게이트 |
 | 11. 제약 사항 | §9.6.7 Limitations | 리스크 · 정책 제약 |
 | 12. 가정 및 의존성 | §9.6.8 Assumptions and dependencies | 가정 · 외부 의존성 |
 | 13. 설계 제약 (ADR) | §9.6.16 Design constraints | ADR-001 ~ 005 |
