@@ -12,6 +12,7 @@ import re, sys, os, glob
 DOCS = [
     "ai-place-prd-v1_0.md",
     "docs/[SRS 문서] AI-Place-Mate (한글).md",
+    "docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md",
     "docs/[설계 문서] AI-Place-Mate (한글).md",
     "README.md",
 ]
@@ -80,7 +81,8 @@ def main():
         print(f'{os.path.basename(path)}: {len(lines)}줄 · 표 {tables}개 '
               f'· 열 불일치 {bad}건 · mermaid {len(blocks)}개')
         if dump:
-            tag = 'SRS' if 'SRS' in path else 'SDD' if '설계' in path else 'PRD'
+            tag = ('TEC' if '기술제약' in path else 'SRS') if 'SRS' in path \
+                else 'SDD' if '설계' in path else 'PRD'
             for k, (ln, body) in enumerate(blocks, 1):
                 out = os.path.join(dump, f'{tag}_{k:02d}_L{ln}.mmd')
                 open(out, 'w', encoding='utf-8').write(body + '\n')
