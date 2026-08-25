@@ -48,7 +48,7 @@ def validate():
                 errs.append(f"{tid}: 미정의 선행 태스크 {d}")
         if cx not in ("H", "M", "L"):
             errs.append(f"{tid}: 잘못된 복잡도 {cx}")
-        if ty not in ("Contract", "Data", "Read", "Write", "Test", "Infra", "NFR", "Design"):
+        if ty not in ("Contract", "Data", "Read", "Write", "UI", "Test", "Infra", "NFR", "Design"):
             errs.append(f"{tid}: 잘못된 유형 {ty}")
         if sp not in D.SPRINT_ORDER:
             errs.append(f"{tid}: 잘못된 스프린트 {sp}")
@@ -107,13 +107,13 @@ def build():
     A = L.append
     n = len(D.TASKS)
     steps = {"Contract": "Step 1", "Data": "Step 1", "Read": "Step 2", "Write": "Step 2",
-             "Test": "Step 3", "Infra": "Step 4", "NFR": "Step 4", "Design": "—"}
+             "UI": "Step 2", "Test": "Step 3", "Infra": "Step 4", "NFR": "Step 4", "Design": "—"}
 
     A("# [태스크 리스트] AI-Place-Mate")
     A("")
     A("**문서 ID:** TASK-AIPLACE-MVP-001")
     A("")
-    A("**개정 버전:** 2.0 (Phase 0 반영)")
+    A("**개정 버전:** 3.0 (축약 적용 — 118 → 56건)")
     A("")
     A("**날짜:** 2026-08-25")
     A("")
@@ -148,6 +148,11 @@ def build():
       " ".join(f"`{p}`" for p in D.PART_A_ORDER) + " | 동작하는 코드 · 구성 |")
     A("| **Part B** | UI/UX 디자인 | `UX` | 화면 정의 · 디자인 산출물 |")
     A("")
+    ui_n = sum(1 for t in D.TASKS if t[5] == "UI")
+    A(f"Part A 안에서도 **UX 구현({ui_n}건 · 유형 `UI`)과 기능 구현(BE)을 분리**한다. "
+      "담당자와 리뷰 관점이 다르고, UX 구현 진척을 독립적으로 추적해야 하기 때문이다. "
+      "병합 시에도 두 계층을 섞지 않는다(원칙 P6 · ANL-AIPLACE-TASK-002 §4.4).")
+    A("")
     A("### 0.3 유형(Type) 분류")
     A("")
     A("`유형` 열은 태스크가 추출 방법론의 어느 단계에 속하는지를 나타낸다. Read/Write 구분은 "
@@ -160,6 +165,7 @@ def build():
         "Data": "DB 스키마 · 정규화 사전 · Mock 픽스처",
         "Read": "조회 · 질의 경로 (상태 변경 없음)",
         "Write": "상태 변경 · Server Action · Cron · 웹훅",
+        "UI": "**프론트엔드 화면·클라이언트 구현** — 기능 구현(BE)과 분리",
         "Test": "AC를 실행 가능한 테스트로 변환",
         "Infra": "프레임워크 · 배포 · 게이트 · 외부 연동 배선",
         "NFR": "보안 · 관측 · 비용 · 복구",
@@ -168,7 +174,7 @@ def build():
     cnt = defaultdict(int)
     for t in D.TASKS:
         cnt[t[5]] += 1
-    for k in ["Contract", "Data", "Read", "Write", "Test", "Infra", "NFR", "Design"]:
+    for k in ["Contract", "Data", "Read", "Write", "UI", "Test", "Infra", "NFR", "Design"]:
         A(f"| `{k}` | {meaning[k]} | {steps[k]} | {cnt[k]} |")
     A(f"| | | **합계** | **{n}** |")
     A("")
@@ -219,10 +225,10 @@ def build():
     top = sorted(BLOCKS.items(), key=lambda kv: -len(kv[1]))[:10]
     A("```mermaid")
     A("flowchart LR")
-    style = {"Contract": "ctr", "Data": "dat", "Infra": "inf",
+    style = {"Contract": "ctr", "Data": "dat", "Infra": "inf", "UI": "ui",
              "Read": "rd", "Write": "wr", "Test": "tst", "NFR": "nfr", "Design": "dsg"}
-    chain = ["INF-001", "INF-004", "DAT-001", "CTR-001", "DAT-006",
-             "QRY-001", "RNK-001", "RNK-003", "RSV-004", "MCH-001", "AGR-005"]
+    chain = ["INF-001", "INF-003", "DAT-001", "CTR-001", "DAT-006",
+             "QRY-001", "RNK-001", "RNK-003", "RSV-003", "MCH-003", "AGR-005"]
     for c in chain:
         t = BY[c]
         A(f'    {c.replace("-","")}["{c}<br/>{t[1][:22]}<br/>후행 {len(BLOCKS.get(c,[]))}건"]:::{style[t[5]]}')
@@ -236,6 +242,7 @@ def build():
     A("    classDef tst fill:#ede7f6,stroke:#7e57c2")
     A("    classDef nfr fill:#cff4fc,stroke:#0dcaf0")
     A("    classDef dsg fill:#fce4ec,stroke:#ec407a")
+    A("    classDef ui fill:#e0f2f1,stroke:#009688")
     A("```")
     A("")
     A("### 후행 태스크가 많은 상위 10건")
@@ -310,7 +317,7 @@ def build():
     A("")
     A("---")
     A("")
-    A(f"**TASK-AIPLACE-MVP-001 · v2.0 · 2026-08-25 · Owner 5팀 · 태스크 {n}건**")
+    A(f"**TASK-AIPLACE-MVP-001 · v3.0 · 2026-08-25 · Owner 5팀 · 태스크 {n}건**")
     return "\n".join(L) + "\n"
 
 
