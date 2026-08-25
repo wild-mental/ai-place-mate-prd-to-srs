@@ -51,7 +51,7 @@ PRD에는 예시 SRS의 7개 섹션 어디에도 자연스럽게 들어가지 �
 | `docs/[SRS 문서] AI-Place-Mate (한글).md` | **산출물 ①.** PRD v1.0을 예시 SRS 양식으로 변환한 SRS (1–7장 양식 준수 · 8–14장 29148 확장 · 다이어그램 9개 배치) |
 | `docs/[설계 문서] AI-Place-Mate (한글).md` | **산출물 ②.** SRS에서 도출한 기술 설계 문서 (SDD) — 다이어그램 32개 |
 | `docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md` | **산출물 ③.** 기술 제약 C-TEC-001~007을 적용한 병렬 SRS (Next.js 단일 스택) |
-| `docs/[태스크 리스트] AI-Place-Mate.md` | **산출물 ④.** 반영판 SRS에서 도출한 실행 태스크 97건 (Epic 13 · 의존성 · 복잡도) |
+| `docs/[태스크 리스트] AI-Place-Mate.md` | **산출물 ④.** 실행 태스크 **118건** (Epic 16 · 유형 · 선행/후행 · 복잡도). `tools/tasks_data.py` 에서 **생성** — 직접 편집 금지 |
 | `docs/[분석] 태스크 추출 방법론 적합성 평가.md` | **산출물 ⑤.** 4단계 추출 방법론 기준 갭 분석 및 풀버전 작성 순서 |
 | `.github/ISSUE_TEMPLATE/feature-task.md` | GitHub Project 용 TASK 템플릿 (`tools/make_task_template.py` 생성) |
 
@@ -109,6 +109,7 @@ PRD 기준선 대부분이 **가설(H)** 상태입니다. 모의 인터뷰 11건
 - [x] 기술 설계 문서(SDD) 작성 및 SRS에 다이어그램 배치
 - [x] 기술 제약 반영판 SRS 작성 (Next.js + Supabase + Gemini + Vercel)
 - [x] 실행 태스크 리스트 도출 (97건 · 커버리지 누락 0)
+- [x] Phase 0 — 앵커 심기 · Blocks 역산 · 유형 열 · Epic 3개 신설 (97 → 118건)
 
 ---
 
@@ -277,6 +278,36 @@ PRD가 이미 확정했으나 예시 양식에 대응 절이 없는 내용만, �
 ### 임의 추가 방지
 
 SRS에 없는 기능은 넣지 않았고, **의도적으로 제외한 항목은 부록 D에 근거와 함께 명시**했습니다 (연기 대상 6건 · 미사용 2건 · 미해소 결정 대기 2건).
+
+---
+
+## 11. Phase 0 — 태스크 문서화 선결 작업
+
+방법론 적합성 평가(§10)가 지목한 4개 선결 항목을 반영했습니다. 태스크 리스트는 이제 **생성물**입니다.
+
+| 항목 | 조치 | 결과 |
+| --- | --- | --- |
+| 참조 앵커 | 요구사항·태스크 ID에 인라인 앵커 삽입 | **161개** (REQ 67 · TASK 118 중 중복 제외) |
+| `Blocks` 역산 | `선행 태스크`에서 자동 도출 | **188개 관계** · 양방향 불일치 0 |
+| 유형(Type) 열 | Contract/Data/Read/Write/Test/Infra/NFR/Design | 118건 전건 분류 |
+| Epic 신설 | `CTR` 계약 6 · `MCK` Mock 5 · `TST` 테스트 11 | 97 → **118건** |
+
+### 생성 체계
+
+```
+tools/tasks_data.py     ← 단일 원천 (118 레코드)
+        ↓ gen_task_list.py (검증 + 렌더)
+docs/[태스크 리스트] AI-Place-Mate.md   ← 생성물 · 직접 편집 금지
+```
+
+`후행 태스크(Blocks)`를 수기로 쓰면 반드시 어긋나므로 역산으로만 채웁니다. 생성기가 **중복 ID · 미정의 선행 · 순환 의존성 · 스프린트 역전**을 검사하고, 하나라도 걸리면 문서를 쓰지 않습니다.
+
+| 도구 | 용도 |
+| --- | --- |
+| `tools/gen_task_list.py` | 태스크 리스트 생성 (`--check` 로 데이터-문서 일치 확인) |
+| `tools/add_anchors.py` | SRS 요구사항 앵커 삽입 (`--check` · 멱등) |
+| `tools/make_task_template.py` | GitHub 이슈 템플릿 생성 |
+| `tools/verify_docs.py` | 표 열 정합 · mermaid 추출 · 앵커 집계 |
 
 ---
 

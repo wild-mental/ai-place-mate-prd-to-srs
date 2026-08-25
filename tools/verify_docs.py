@@ -89,6 +89,16 @@ def main():
                 out = os.path.join(dump, f'{tag}_{k:02d}_L{ln}.mmd')
                 open(out, 'w', encoding='utf-8').write(body + '\n')
 
+    # 앵커 무결성 — 태스크 리스트가 참조하는 앵커가 SRS에 실재하는가
+    import re as _re
+    anchors = set()
+    for _p in ["docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md",
+               "docs/[SRS 문서] AI-Place-Mate (한글).md",
+               "docs/[태스크 리스트] AI-Place-Mate.md"]:
+        if os.path.exists(_p):
+            anchors |= set(_re.findall(r'<a id="([^"]+)"', open(_p, encoding="utf-8").read()))
+    print(f'\n인라인 앵커 {len(anchors)}개 (요구사항 + 태스크)')
+
     srs = req_ids.get("docs/[SRS 문서] AI-Place-Mate (한글).md", set())
     sdd = req_ids.get("docs/[설계 문서] AI-Place-Mate (한글).md", set())
     orphan = sorted(sdd - srs)

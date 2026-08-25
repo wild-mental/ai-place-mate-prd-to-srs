@@ -38,9 +38,9 @@ assignees: ''
 
 ## 🔗 References (Spec & Context)
 > 💡 AI Agent & Dev Note: 작업 시작 전 아래 문서를 반드시 먼저 Read/Evaluate 할 것.
-- 태스크 리스트: `/docs/[태스크 리스트] AI-Place-Mate.md#<task-anchor>`
-- SRS 문서(기술제약 반영판): `/docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md#<req-anchor>`
-- SRS 문서(기술 중립판): `/docs/[SRS 문서] AI-Place-Mate (한글).md#<req-anchor>`
+- 태스크 리스트: `/docs/[태스크 리스트] AI-Place-Mate.md#<TASK-ID>`  <!-- 예: #DAT-001 -->
+- SRS 문서(기술제약 반영판): `/docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md#<REQ-ID>`  <!-- 예: #REQ-FUNC-001 -->
+- SRS 문서(기술 중립판): `/docs/[SRS 문서] AI-Place-Mate (한글).md#<REQ-ID>`
 - 설계 문서(SDD): `/docs/[설계 문서] AI-Place-Mate (한글).md#<diagram-anchor>`
 - 시퀀스 다이어그램: `<SD-01 ~ SD-10 중 해당 항목 · 없으면 "해당 없음">`
 - 데이터 모델 (ERD): `/docs/[설계 문서] AI-Place-Mate (한글).md#31-erd--개체와-관계`
@@ -85,8 +85,8 @@ Scenario 2: <실패 흐름 제목>
 - [ ] 관련 계측 이벤트가 적재되는가? <!-- 해당 시 · SRS §10.2 -->
 
 ## 🚧 Dependencies & Blockers
-- Depends on: #<이슈번호> (<선행 TASK-ID> — 태스크 리스트의 선행 태스크와 일치해야 함)
-- Blocks: #<이슈번호> (<후행 TASK-ID>)
+- Depends on: #<이슈번호> (<선행 TASK-ID> — 태스크 리스트 `선행 태스크` 열과 일치해야 함)
+- Blocks: #<이슈번호> (<후행 TASK-ID> — 태스크 리스트 `후행 태스크` 열에서 그대로 옮길 것. 손으로 유추하지 말 것)
 - External Blocker: <DEP-T1 ~ T5 등 외부 의존성 · 없으면 "없음">
 """
 
