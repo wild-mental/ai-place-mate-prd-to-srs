@@ -54,7 +54,8 @@ PRD에는 예시 SRS의 7개 섹션 어디에도 자연스럽게 들어가지 �
 | `docs/[태스크 리스트] AI-Place-Mate.md` | **산출물 ④.** 실행 태스크 **118건** (Epic 16 · 유형 · 선행/후행 · 복잡도). `tools/tasks_data.py` 에서 **생성** — 직접 편집 금지 |
 | `docs/[분석] 태스크 추출 방법론 적합성 평가.md` | **산출물 ⑤.** 4단계 추출 방법론 기준 갭 분석 및 풀버전 작성 순서 |
 | `.github/ISSUE_TEMPLATE/feature-task.md` | GitHub Project 용 TASK 템플릿 (`tools/make_task_template.py` 생성) |
-| `docs/tasks/*.md` | **산출물 ⑥.** 태스크별 GitHub Issue 명세 (P1 진행 중 · 3/118건) |
+| `docs/tasks/*.md` | **산출물 ⑥.** 태스크별 GitHub Issue 명세 (P1 진행 중 · 3건) |
+| `docs/[분석] 태스크 축약 가능성 검토.md` | **산출물 ⑦.** 118 → 53건 병합안 (검증 완료 · 적용 대기) |
 
 ---
 

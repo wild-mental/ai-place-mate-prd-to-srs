@@ -16,6 +16,7 @@ DOCS = [
     "docs/[설계 문서] AI-Place-Mate (한글).md",
     "docs/[태스크 리스트] AI-Place-Mate.md",
     "docs/[분석] 태스크 추출 방법론 적합성 평가.md",
+    "docs/[분석] 태스크 축약 가능성 검토.md",
     "README.md",
 ]
 
