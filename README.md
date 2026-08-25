@@ -54,6 +54,7 @@ PRD에는 예시 SRS의 7개 섹션 어디에도 자연스럽게 들어가지 �
 | `docs/[태스크 리스트] AI-Place-Mate.md` | **산출물 ④.** 실행 태스크 **118건** (Epic 16 · 유형 · 선행/후행 · 복잡도). `tools/tasks_data.py` 에서 **생성** — 직접 편집 금지 |
 | `docs/[분석] 태스크 추출 방법론 적합성 평가.md` | **산출물 ⑤.** 4단계 추출 방법론 기준 갭 분석 및 풀버전 작성 순서 |
 | `.github/ISSUE_TEMPLATE/feature-task.md` | GitHub Project 용 TASK 템플릿 (`tools/make_task_template.py` 생성) |
+| `docs/tasks/*.md` | **산출물 ⑥.** 태스크별 GitHub Issue 명세 (P1 진행 중 · 3/118건) |
 
 ---
 
@@ -110,6 +111,7 @@ PRD 기준선 대부분이 **가설(H)** 상태입니다. 모의 인터뷰 11건
 - [x] 기술 제약 반영판 SRS 작성 (Next.js + Supabase + Gemini + Vercel)
 - [x] 실행 태스크 리스트 도출 (97건 · 커버리지 누락 0)
 - [x] Phase 0 — 앵커 심기 · Blocks 역산 · 유형 열 · Epic 3개 신설 (97 → 118건)
+- [ ] Phase 1 — 계약·데이터·Mock 21건 이슈 명세 (DAT-001 · CTR-001 · CTR-002 완료)
 
 ---
 
