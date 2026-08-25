@@ -2,7 +2,7 @@
 
 **문서 ID:** TASK-AIPLACE-MVP-001
 
-**개정 버전:** 3.1 (축약 56건 · 참조 구조화 · 임계 경로 실측)
+**개정 버전:** 3.2 (축약 56건 + 미담당 요구사항 3건 승격 = 59건)
 
 **날짜:** 2026-08-25
 
@@ -49,17 +49,17 @@ Part A 안에서도 **UX 구현(6건 · 유형 `UI`)과 기능 구현(BE)을 분
 | `Write` | 상태 변경 · Server Action · Cron · 웹훅 | Step 2 | 12 |
 | `UI` | **프론트엔드 화면·클라이언트 구현** — 기능 구현(BE)과 분리 | Step 2 | 6 |
 | `Test` | AC를 실행 가능한 테스트로 변환 | Step 3 | 6 |
-| `Infra` | 프레임워크 · 배포 · 게이트 · 외부 연동 배선 | Step 4 | 6 |
-| `NFR` | 보안 · 관측 · 비용 · 복구 | Step 4 | 7 |
+| `Infra` | 프레임워크 · 배포 · 게이트 · 외부 연동 배선 | Step 4 | 7 |
+| `NFR` | 보안 · 관측 · 비용 · 복구 | Step 4 | 9 |
 | `Design` | 디자인 토큰 · 화면 정의 | — | 8 |
-| | | **합계** | **56** |
+| | | **합계** | **59** |
 
 ### 0.4 Epic 목록
 
 | Epic | 도메인 | 태스크 수 |
 | --- | --- | --- |
 | `INF` | Platform & Infra | 4 |
-| `TEC` | Constraint Gate | 1 |
+| `TEC` | Constraint Gate | 2 |
 | `CTR` | Contract | 3 |
 | `DAT` | Data & Indexing | 4 |
 | `MCK` | Mock | 1 |
@@ -71,10 +71,10 @@ Part A 안에서도 **UX 구현(6건 · 유형 `UI`)과 기능 구현(BE)을 분
 | `AGR` | Agent Room | 5 |
 | `ANA` | Analytics | 3 |
 | `SEC` | Security & Privacy | 2 |
-| `REL` | Reliability & Ops | 2 |
+| `REL` | Reliability & Ops | 4 |
 | `TST` | Test | 6 |
 | `UX` | UI/UX Design | 8 |
-| | **합계** | **56** |
+| | **합계** | **59** |
 
 ### 0.5 복잡도 판정 기준
 
@@ -84,7 +84,7 @@ Part A 안에서도 **UX 구현(6건 · 유형 `UI`)과 기능 구현(BE)을 분
 | **M** | 기존 패턴의 조합. 설계는 정해져 있고 구현량이 있음 | Server Action 작성 · Cron 엔드포인트 |
 | **L** | 설정·선언 수준. 판단이 거의 필요 없음 | 환경 변수 등록 · PITR 활성화 |
 
-분포: **H 21 · M 34 · L 1**
+분포: **H 21 · M 36 · L 2**
 
 ---
 
@@ -94,18 +94,19 @@ Part A 안에서도 **UX 구현(6건 · 유형 `UI`)과 기능 구현(BE)을 분
 
 | Task ID | Epic (도메인) | Feature (기능명) | 유형 | 관련 SRS 참조 | 선행 태스크 (Dependencies) | 후행 태스크 (Blocks) | 복잡도 (H/M/L) |
 |---|---|---|---|---|---|---|---|
-| <a id="INF-001"></a>**INF-001** | Platform & Infra | Next.js 앱 생성 · Vercel 연결 · 환경 변수 · Cron 스케줄 | `Infra` | §1.5 C-TEC-{001, 007} · §4.3 REQ-TEC-013 · §6.1 Cron 스케줄 · §6.5 환경 변수 · §14.1 디렉터리 구조 · §14.4 | None | AGR-005 · ANA-002 · DAT-010 · INF-002 · INF-003 · INF-008 · MCK-001 · QRY-002 · REL-001 · RSV-003 · RSV-005 · SEC-001 · TEC-001 | M |
+| <a id="INF-001"></a>**INF-001** | Platform & Infra | Next.js 앱 생성 · Vercel 연결 · 환경 변수 · Cron 스케줄 | `Infra` | §1.5 C-TEC-{001, 007} · §4.3 REQ-TEC-013 · §6.1 Cron 스케줄 · §6.5 환경 변수 · §14.1 디렉터리 구조 · §14.4 | None | AGR-005 · ANA-002 · DAT-010 · INF-002 · INF-003 · INF-008 · MCK-001 · QRY-002 · REL-001 · REL-006 · RSV-003 · RSV-005 · SEC-001 · TEC-001 | M |
 | <a id="INF-002"></a>**INF-002** | Platform & Infra | Tailwind CSS + shadcn/ui 설정 및 네이버 지도 탭 진입 경로 | `UI` | §1.5 C-TEC-004 · §3.2 인터페이스 목록 · §4.3 REQ-TEC-007 · ADR-005 | INF-001 · UX-001 | MCH-002 | M |
-| <a id="INF-003"></a>**INF-003** | Platform & Infra | Supabase · Prisma 연결 (Supavisor) 및 마이그레이션 승인 절차 | `Infra` | §1.5 C-TEC-003 · §4.3 REQ-TEC-{004, 005, 006} · §6.4 · §14.4 배포 파이프라인 · ADR-T04 | INF-001 | AGR-002 · DAT-001 · MCH-001 · REL-001 · REL-004 · TEC-001 | M |
+| <a id="INF-003"></a>**INF-003** | Platform & Infra | Supabase · Prisma 연결 (Supavisor) 및 마이그레이션 승인 절차 | `Infra` | §1.5 C-TEC-003 · §4.3 REQ-TEC-{004, 005, 006} · §6.4 · §14.4 배포 파이프라인 · ADR-T04 | INF-001 | AGR-002 · DAT-001 · MCH-001 · REL-001 · REL-004 · REL-006 · TEC-001 | M |
 | <a id="INF-008"></a>**INF-008** | Platform & Infra | `proxy.ts` 요청 태깅 및 인증 훅 | `Infra` | §3.1 배포 토폴로지 · §3.3 | INF-001 | None | M |
 
-### `TEC` — Constraint Gate (1건)
+### `TEC` — Constraint Gate (2건)
 
 > 제약은 선언이고, 이 Epic은 **선언을 어겼을 때 빌드가 실패하게 만드는 장치**다. S-1에서 먼저 작동시켜야 이후 스프린트의 위반이 즉시 드러난다(SRS §14.2).
 
 | Task ID | Epic (도메인) | Feature (기능명) | 유형 | 관련 SRS 참조 | 선행 태스크 (Dependencies) | 후행 태스크 (Blocks) | 복잡도 (H/M/L) |
 |---|---|---|---|---|---|---|---|
-| <a id="TEC-001"></a>**TEC-001** | Constraint Gate | 제약 게이트 구축 — 모듈 스캐폴딩 · 공개 표면 · 경계 규칙 · 검사 스크립트 · 빌드 편입 | `Infra` | §3.3 모듈 구조 · §4.3 REQ-TEC-{001, 002, 003, 004, 005, 008, 011, 012, 015} · §14.1 · §14.4 · ADR-T01 · ADR-T08 | INF-001 · INF-003 | TST-007 · TST-008 | H |
+| <a id="TEC-001"></a>**TEC-001** | Constraint Gate | 제약 게이트 구축 — 모듈 스캐폴딩 · 공개 표면 · 경계 규칙 · 검사 스크립트 · 빌드 편입 | `Infra` | §3.3 모듈 구조 · §4.3 REQ-TEC-{001, 002, 003, 004, 005, 008, 011, 012, 015} · §14.1 · §14.4 · ADR-T01 · ADR-T08 | INF-001 · INF-003 | TEC-006 · TST-007 · TST-008 | H |
+| <a id="TEC-006"></a>**TEC-006** | Constraint Gate | 비동기 작업 수단 제한 검사 및 DB 큐 테이블 규약 | `Infra` | §1.5.1 D-04 · §4.3 REQ-TEC-014 · §10.2 계측 구현 | TEC-001 | None | L |
 
 ### `CTR` — Contract (3건)
 
@@ -114,7 +115,7 @@ Part A 안에서도 **UX 구현(6건 · 유형 `UI`)과 기능 구현(BE)을 분
 | Task ID | Epic (도메인) | Feature (기능명) | 유형 | 관련 SRS 참조 | 선행 태스크 (Dependencies) | 후행 태스크 (Blocks) | 복잡도 (H/M/L) |
 |---|---|---|---|---|---|---|---|
 | <a id="CTR-001"></a>**CTR-001** | Contract | Server Action 9종 입출력 계약 (Zod DTO) 및 `ConditionSet` 스키마 | `Contract` | §4.3 REQ-TEC-010 · §6.1 Server Actions · §6.6 AI 호출 규약 | DAT-001 | AGR-001 · CTR-002 · EVD-005 · MCH-004 · MCK-001 · QRY-001 · QRY-002 · QRY-005 · QRY-007 · RSV-001 · TST-001 · TST-005 | H |
-| <a id="CTR-002"></a>**CTR-002** | Contract | Route Handler 8종 요청·응답 계약 및 에러 코드 체계 | `Contract` | §6.1 Route Handlers · §6.3-6 빈 화면 금지 | CTR-001 | ANA-002 · EVD-004 · MCK-001 · RNK-003 · RSV-003 · TST-004 | M |
+| <a id="CTR-002"></a>**CTR-002** | Contract | Route Handler 8종 요청·응답 계약 및 에러 코드 체계 | `Contract` | §6.1 Route Handlers · §6.3-6 빈 화면 금지 | CTR-001 | ANA-002 · EVD-004 · MCK-001 · REL-007 · RNK-003 · RSV-003 · TST-004 | M |
 | <a id="CTR-005"></a>**CTR-005** | Contract | 계측 이벤트 계약 20종 (필수 속성 포함) | `Contract` | §10.2 계측 구현 | DAT-001 | ANA-002 · TST-008 | H |
 
 ### `DAT` — Data & Indexing (4건)
@@ -196,8 +197,8 @@ Part A 안에서도 **UX 구현(6건 · 유형 `UI`)과 기능 구현(BE)을 분
 
 | Task ID | Epic (도메인) | Feature (기능명) | 유형 | 관련 SRS 참조 | 선행 태스크 (Dependencies) | 후행 태스크 (Blocks) | 복잡도 (H/M/L) |
 |---|---|---|---|---|---|---|---|
-| <a id="ANA-002"></a>**ANA-002** | Analytics | 이벤트 수집 (`sendBeacon` · `after()`) 및 지표 집계 Cron | `Write` | §6.1 · §10.1 성과 지표 · §10.2 · ADR-T07 | CTR-002 · CTR-005 · INF-001 | ANA-005 · ANA-007 · QRY-005 | H |
-| <a id="ANA-005"></a>**ANA-005** | Analytics | 계측 품질 점검 및 임계 알림 디스패처 | `NFR` | §4.2 REQ-NF-015 · §10.2 · §10.3 | ANA-002 | REL-001 | M |
+| <a id="ANA-002"></a>**ANA-002** | Analytics | 이벤트 수집 (`sendBeacon` · `after()`) 및 지표 집계 Cron | `Write` | §6.1 · §10.1 성과 지표 · §10.2 · ADR-T07 | CTR-002 · CTR-005 · INF-001 | ANA-005 · ANA-007 · QRY-005 · REL-007 | H |
+| <a id="ANA-005"></a>**ANA-005** | Analytics | 계측 품질 점검 및 임계 알림 디스패처 | `NFR` | §4.2 REQ-NF-015 · §10.2 · §10.3 | ANA-002 | REL-001 · REL-006 | M |
 | <a id="ANA-007"></a>**ANA-007** | Analytics | AI 추론 비용 집계 및 단위 경제 리포트 | `NFR` | §4.2 REQ-NF-{013, 014} · §10.1 · §10.3 | ANA-002 · QRY-002 | None | M |
 
 ### `SEC` — Security & Privacy (2건)
@@ -207,12 +208,14 @@ Part A 안에서도 **UX 구현(6건 · 유형 `UI`)과 기능 구현(BE)을 분
 | <a id="SEC-001"></a>**SEC-001** | Security & Privacy | 개인정보 30일 파기 Cron (`/api/cron/purge`) | `NFR` | §4.2 REQ-NF-010 · §6.1 | DAT-001 · INF-001 | None | M |
 | <a id="SEC-002"></a>**SEC-002** | Security & Privacy | 프롬프트 개인정보 배제 검증 | `NFR` | §4.2 REQ-NF-010 · §6.6 | QRY-002 | None | M |
 
-### `REL` — Reliability & Ops (2건)
+### `REL` — Reliability & Ops (4건)
 
 | Task ID | Epic (도메인) | Feature (기능명) | 유형 | 관련 SRS 참조 | 선행 태스크 (Dependencies) | 후행 태스크 (Blocks) | 복잡도 (H/M/L) |
 |---|---|---|---|---|---|---|---|
 | <a id="REL-001"></a>**REL-001** | Reliability & Ops | 관측 연동 · Cron 실패·풀 사용률 알림 · 롤백 절차 | `NFR` | §4.2 REQ-NF-{001a, 001b, 009} · §10.3 · §11.2 R-T2 · R-T3 · R-T4 | ANA-005 · INF-001 · INF-003 · QRY-005 | None | M |
 | <a id="REL-004"></a>**REL-004** | Reliability & Ops | Supabase PITR 활성화 (RPO ≤ 5분) | `NFR` | §4.2 REQ-NF-009 · §6.4 | INF-003 | None | L |
+| <a id="REL-006"></a>**REL-006** | Reliability & Ops | 가용성 측정 및 플랫폼 SLA 합성 산정 | `NFR` | §4.2 REQ-NF-005 · §10.3 · §11.2 LIM-T05 · §15.1 | ANA-005 · INF-001 · INF-003 | None | M |
+| <a id="REL-007"></a>**REL-007** | Reliability & Ops | 오류율 집계·분류 (5xx / 4xx / 폴백 신호 구분) | `NFR` | §4.2 REQ-NF-006 · §6.3-6 · §10.3 | ANA-002 · CTR-002 | None | M |
 
 ### `TST` — Test (6건)
 
@@ -254,12 +257,12 @@ Part A 안에서도 **UX 구현(6건 · 유형 `UI`)과 기능 구현(BE)을 분
 
 ```mermaid
 flowchart LR
-    INF001["INF-001<br/>Next.js 앱 생성…<br/>후행 13건"]:::inf
-    INF003["INF-003<br/>Supabase · Prisma…<br/>후행 6건"]:::inf
+    INF001["INF-001<br/>Next.js 앱 생성…<br/>후행 14건"]:::inf
+    INF003["INF-003<br/>Supabase · Prisma…<br/>후행 7건"]:::inf
     DAT001["DAT-001<br/>Prisma 스키마 전체…<br/>후행 15건"]:::dat
     CTR001["CTR-001<br/>Server Action 9종…<br/>후행 12건"]:::ctr
-    CTR002["CTR-002<br/>Route Handler 8종…<br/>후행 6건"]:::ctr
-    ANA002["ANA-002<br/>이벤트 수집…<br/>후행 3건"]:::wr
+    CTR002["CTR-002<br/>Route Handler 8종…<br/>후행 7건"]:::ctr
+    ANA002["ANA-002<br/>이벤트 수집…<br/>후행 4건"]:::wr
     QRY005["QRY-005<br/>submitQuery Server…<br/>후행 2건"]:::wr
     RNK003["RNK-003<br/>결과 RSC 스트리밍 페이지…<br/>후행 3건"]:::ui
     RSV001["RSV-001<br/>selectProposal 조건…<br/>후행 1건"]:::wr
@@ -299,15 +302,15 @@ flowchart LR
 | 태스크 | Feature | 유형 | 직접 후행 수 | 후행 태스크 |
 | --- | --- | --- | --- | --- |
 | [`DAT-001`](#DAT-001) | Prisma 스키마 전체 — 엔터티 · Verification · Event 파티셔닝 · `canonicalKey` 정규화 사전 | `Data` | **15** | AGR-001 · AGR-002 · CTR-001 · CTR-005 · DAT-006 · DAT-008 · DAT-010 · EVD-001 · MCH-003 · MCH-004 · QRY-009 · RSV-001 · RSV-003 · SEC-001 · TST-008 |
-| [`INF-001`](#INF-001) | Next.js 앱 생성 · Vercel 연결 · 환경 변수 · Cron 스케줄 | `Infra` | **13** | AGR-005 · ANA-002 · DAT-010 · INF-002 · INF-003 · INF-008 · MCK-001 · QRY-002 · REL-001 · RSV-003 · RSV-005 · SEC-001 · TEC-001 |
+| [`INF-001`](#INF-001) | Next.js 앱 생성 · Vercel 연결 · 환경 변수 · Cron 스케줄 | `Infra` | **14** | AGR-005 · ANA-002 · DAT-010 · INF-002 · INF-003 · INF-008 · MCK-001 · QRY-002 · REL-001 · REL-006 · RSV-003 · RSV-005 · SEC-001 · TEC-001 |
 | [`CTR-001`](#CTR-001) | Server Action 9종 입출력 계약 (Zod DTO) 및 `ConditionSet` 스키마 | `Contract` | **12** | AGR-001 · CTR-002 · EVD-005 · MCH-004 · MCK-001 · QRY-001 · QRY-002 · QRY-005 · QRY-007 · RSV-001 · TST-001 · TST-005 |
+| [`INF-003`](#INF-003) | Supabase · Prisma 연결 (Supavisor) 및 마이그레이션 승인 절차 | `Infra` | **7** | AGR-002 · DAT-001 · MCH-001 · REL-001 · REL-004 · REL-006 · TEC-001 |
+| [`CTR-002`](#CTR-002) | Route Handler 8종 요청·응답 계약 및 에러 코드 체계 | `Contract` | **7** | ANA-002 · EVD-004 · MCK-001 · REL-007 · RNK-003 · RSV-003 · TST-004 |
 | [`UX-001`](#UX-001) | 디자인 시스템 — 토큰 · Tailwind 테마 · shadcn/ui 컴포넌트 인벤토리 | `Design` | **6** | INF-002 · UX-003 · UX-006 · UX-013 · UX-014 · UX-015 |
-| [`INF-003`](#INF-003) | Supabase · Prisma 연결 (Supavisor) 및 마이그레이션 승인 절차 | `Infra` | **6** | AGR-002 · DAT-001 · MCH-001 · REL-001 · REL-004 · TEC-001 |
-| [`CTR-002`](#CTR-002) | Route Handler 8종 요청·응답 계약 및 에러 코드 체계 | `Contract` | **6** | ANA-002 · EVD-004 · MCK-001 · RNK-003 · RSV-003 · TST-004 |
+| [`ANA-002`](#ANA-002) | 이벤트 수집 (`sendBeacon` · `after()`) 및 지표 집계 Cron | `Write` | **4** | ANA-005 · ANA-007 · QRY-005 · REL-007 |
 | [`QRY-002`](#QRY-002) | AI SDK 단일 진입점 `lib/ai.ts` 및 Gemini 폴백 파서 | `Infra` | **4** | ANA-007 · EVD-001 · QRY-005 · SEC-002 |
+| [`TEC-001`](#TEC-001) | 제약 게이트 구축 — 모듈 스캐폴딩 · 공개 표면 · 경계 규칙 · 검사 스크립트 · 빌드 편입 | `Infra` | **3** | TEC-006 · TST-007 · TST-008 |
 | [`DAT-006`](#DAT-006) | 색인 파이프라인 및 `use cache` 계층 | `Write` | **3** | QRY-001 · QRY-007 · QRY-009 |
-| [`ANA-002`](#ANA-002) | 이벤트 수집 (`sendBeacon` · `after()`) 및 지표 집계 Cron | `Write` | **3** | ANA-005 · ANA-007 · QRY-005 |
-| [`EVD-001`](#EVD-001) | 근거 조립 · 4항목 검증 · 90일 경고 · 판정형 문구 필터 | `Read` | **3** | EVD-004 · EVD-005 · RNK-001 |
 
 ---
 
@@ -317,12 +320,12 @@ SRS §14.2의 스프린트 정의에 태스크를 배치한 것이다. **선행 
 
 | 스프린트 | Part A | Part B |
 | --- | --- | --- |
-| **S-1 기반** | INF-001 · INF-002 · INF-003 · INF-008 · TEC-001 · TST-007 | UX-001 |
+| **S-1 기반** | INF-001 · INF-002 · INF-003 · INF-008 · TEC-001 · TEC-006 · TST-007 | UX-001 |
 | **S0 계약·스키마** | CTR-001 · CTR-002 · CTR-005 · DAT-001 · DAT-008 · REL-004 · TST-008 | — |
 | **S1 색인·계측** | DAT-006 · DAT-010 · MCK-001 · ANA-002 | UX-003 |
 | **S2 필터·메뉴** | QRY-007 · QRY-009 | — |
 | **S3 파싱·근거** | QRY-001 · QRY-002 · QRY-005 · EVD-001 · EVD-005 · SEC-002 · TST-001 | UX-004 |
-| **S4 Top-3·관측** | EVD-004 · RNK-001 · RNK-003 · ANA-005 · REL-001 · TST-010 | UX-006 · UX-010 |
+| **S4 Top-3·관측** | EVD-004 · RNK-001 · RNK-003 · ANA-005 · REL-001 · REL-006 · REL-007 · TST-010 | UX-006 · UX-010 |
 | **S5 예약 승계** | RSV-001 · ANA-007 · SEC-001 | UX-015 |
 | **S6 결제** | RSV-003 · RSV-005 · TST-004 | — |
 | **S7 가맹 콘솔** | MCH-001 · MCH-002 · MCH-003 · MCH-004 | UX-013 |
@@ -354,6 +357,8 @@ SRS §14.2의 스프린트 정의에 태스크를 배치한 것이다. **선행 
 | `REQ-NF-002b` | QRY-001 | 1 |
 | `REQ-NF-003` | TST-010 | 1 |
 | `REQ-NF-004` | TST-010 · UX-003 | 2 |
+| `REQ-NF-005` | REL-006 | 1 |
+| `REQ-NF-006` | REL-007 | 1 |
 | `REQ-NF-007` | RNK-003 · UX-004 | 2 |
 | `REQ-NF-008` | DAT-010 | 1 |
 | `REQ-NF-009` | REL-001 · REL-004 | 2 |
@@ -376,17 +381,12 @@ SRS §14.2의 스프린트 정의에 태스크를 배치한 것이다. **선행 
 | `REQ-TEC-011` | TEC-001 | 1 |
 | `REQ-TEC-012` | TEC-001 · TST-008 | 2 |
 | `REQ-TEC-013` | INF-001 | 1 |
+| `REQ-TEC-014` | TEC-006 | 1 |
 | `REQ-TEC-015` | TEC-001 | 1 |
 
-SRS(기술제약 반영판)가 정의한 요구사항 **42종** 중 **39종**이 담당 태스크를 가진다.
+SRS(기술제약 반영판)가 정의한 요구사항 **42종** 중 **42종**이 담당 태스크를 가진다.
 
-**담당 태스크가 없는 요구사항**
-
-| 요구사항 | 사유 |
-| --- | --- |
-| `REQ-NF-005` | 가용성. Vercel·Supabase 플랫폼 SLA에 종속되어 구현 대상이 아니다 (SRS §15.1 미해소 항목) |
-| `REQ-NF-006` | 오류율. REL-001의 관측으로 감시하며 별도 구현 태스크가 없다 |
-| `REQ-TEC-014` | 비동기 구현 수단 제한 — ANA-002의 `after()` 적재에 포함 |
+**누락 0건** — 정의된 요구사항 전부가 담당 태스크를 가진다.
 
 ---
 
@@ -409,4 +409,4 @@ SRS에 언급되지만 **의도적으로 태스크에서 제외**한 항목이�
 
 ---
 
-**TASK-AIPLACE-MVP-001 · v3.1 · 2026-08-25 · Owner 5팀 · 태스크 56건**
+**TASK-AIPLACE-MVP-001 · v3.2 · 2026-08-25 · Owner 5팀 · 태스크 59건**
