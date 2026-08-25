@@ -15,6 +15,7 @@ DOCS = [
     "docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md",
     "docs/[설계 문서] AI-Place-Mate (한글).md",
     "docs/[태스크 리스트] AI-Place-Mate.md",
+    "docs/[분석] 태스크 추출 방법론 적합성 평가.md",
     "README.md",
 ]
 
@@ -83,7 +84,7 @@ def main():
               f'· 열 불일치 {bad}건 · mermaid {len(blocks)}개')
         if dump:
             tag = ('TEC' if '기술제약' in path else 'SRS') if 'SRS' in path \
-                else 'SDD' if '설계' in path else 'TASK' if '태스크' in path else 'PRD'
+                else 'SDD' if '설계' in path else 'ANL' if '분석' in path else 'TASK' if '태스크' in path else 'PRD'
             for k, (ln, body) in enumerate(blocks, 1):
                 out = os.path.join(dump, f'{tag}_{k:02d}_L{ln}.mmd')
                 open(out, 'w', encoding='utf-8').write(body + '\n')

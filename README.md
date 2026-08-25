@@ -52,6 +52,8 @@ PRD에는 예시 SRS의 7개 섹션 어디에도 자연스럽게 들어가지 �
 | `docs/[설계 문서] AI-Place-Mate (한글).md` | **산출물 ②.** SRS에서 도출한 기술 설계 문서 (SDD) — 다이어그램 32개 |
 | `docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md` | **산출물 ③.** 기술 제약 C-TEC-001~007을 적용한 병렬 SRS (Next.js 단일 스택) |
 | `docs/[태스크 리스트] AI-Place-Mate.md` | **산출물 ④.** 반영판 SRS에서 도출한 실행 태스크 97건 (Epic 13 · 의존성 · 복잡도) |
+| `docs/[분석] 태스크 추출 방법론 적합성 평가.md` | **산출물 ⑤.** 4단계 추출 방법론 기준 갭 분석 및 풀버전 작성 순서 |
+| `.github/ISSUE_TEMPLATE/feature-task.md` | GitHub Project 용 TASK 템플릿 (`tools/make_task_template.py` 생성) |
 
 ---
 
