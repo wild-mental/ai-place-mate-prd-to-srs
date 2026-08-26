@@ -280,4 +280,4 @@
 
 **ANL-AIPLACE-TASK-002 · 2026-08-25 · Owner 5팀**
 
-관련 문서: `[TaskList]AI-Place-Mate-Task-List.md` · `[분석] 태스크 추출 방법론 적합성 평가.md` · `tools/tasks_data.py`
+관련 문서: `[TaskList]AI-Place-Mate-Task-List.md` · `[Analysis]Task-Extraction-Methodology.md` · `tools/tasks_data.py`

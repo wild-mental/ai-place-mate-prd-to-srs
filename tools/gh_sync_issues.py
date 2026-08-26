@@ -38,8 +38,8 @@ def body(tid):
         f"| 후행 | {' · '.join(f'`{x}`' for x in v['blocks']) or '없음'} |",
         "",
         f"📄 원본 명세: [`docs/tasks/{tid}.md`]({BASE}/docs/tasks/{tid}.md) · "
-        f"📋 [태스크 리스트]({BASE}/docs/%5B%ED%83%9C%EC%8A%A4%ED%81%AC%20%EB%A6%AC%EC%8A%A4%ED%8A%B8%5D%20AI-Place-Mate.md#{tid}) · "
-        f"🗓️ [압축 수행 일정]({BASE}/docs/%5B%EC%B4%9D%EA%B4%84%5D%20%EC%95%95%EC%B6%95%20%EC%88%98%ED%96%89%20%EC%9D%BC%EC%A0%95.md)",
+        f"📋 [태스크 리스트]({BASE}/docs/plan-docs/%5BTaskList%5DAI-Place-Mate-Task-List.md#{tid}) · "
+        f"🗓️ [압축 수행 일정]({BASE}/docs/plan-docs/%5BPlan%5DAI-Place-Mate-Fast-Track-Schedule.md)",
         "",
         "---",
         "",

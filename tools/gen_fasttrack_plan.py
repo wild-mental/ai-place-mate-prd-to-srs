@@ -116,7 +116,7 @@ def build():
     A("")
     A("**날짜:** 2026-08-26")
     A("")
-    A("**기본 계획:** PLAN-AIPLACE-MVP-001 (`[총괄] 개발 실행 계획.md` · 6명 · 72영업일)")
+    A("**기본 계획:** PLAN-AIPLACE-MVP-001 (`[Plan]AI-Place-Mate-Execution-Plan.md` · 6명 · 72영업일)")
     A("")
     A("**근거 문서:** TASK-AIPLACE-MVP-001 v3.2 (59건)")
     A("")

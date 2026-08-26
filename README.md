@@ -340,6 +340,7 @@ docs/plan-docs/[TaskList]AI-Place-Mate-Task-List.md   ← 생성물 · 직접 �
 | `tools/gen_task_list.py` | 태스크 리스트 생성 (`--check` 로 데이터-문서 일치 확인) |
 | `tools/add_anchors.py` | SRS 요구사항 앵커 삽입 (`--check` · 멱등) |
 | `tools/make_task_template.py` | GitHub 이슈 템플릿 생성 |
+| `tools/verify_links.py` | 마크다운 링크·앵커 무결성 검사 (문서 이동 후 필수) |
 | `tools/verify_docs.py` | 표 열 정합 · mermaid 추출 · 앵커 집계 |
 
 ---
