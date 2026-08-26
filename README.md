@@ -415,6 +415,17 @@ docs/[태스크 리스트] AI-Place-Mate.md   ← 생성물 · 직접 편집 금
 
 **프로젝트 조작에는 `project` 스코프가 필요합니다** — `gh auth refresh -s project`
 
+### 프로젝트 필드
+
+[AI-PLACE-MATE-GITHUB-PRJ](https://github.com/users/wild-mental/projects/25)에 이슈 59건이 등록되고 일정 필드가 채워져 있습니다.
+
+| 구분 | 필드 |
+| --- | --- |
+| 내장 재사용 | `Start date` · `Target date` · `Estimate`(일수) · `Size`(복잡도) · `Priority`(임계경로/후행수) · `Status` |
+| 신설 | `Week` · `Track` · `Lane` · `Epic` · `Task type` · `Phase` · `Sprint` · `Critical path` · `Depends on` · `Blocks` · `Task ID` · `Complexity note` |
+
+**뷰 설정은 `docs/[운영] GitHub Project 뷰 설정 가이드.md`를 따릅니다** — Projects v2는 뷰 생성 API가 없어 웹에서 만들어야 합니다.
+
 ---
 
 ## 부기 · 표준 원문 취급

@@ -24,10 +24,9 @@ PHASE = {"P0": "P0 기반·계약", "P1": "P1 클로즈드 베타",
          "P1-late": "P1 말 · 예약·결제", "P2": "P2 오픈 베타"}
 
 # (이름, 타입, 옵션)
+# 내장 필드는 재사용한다 — Start date / Target date(DATE) · Estimate(NUMBER, 일수)
+# · Size(SINGLE_SELECT, 복잡도) · Status. 아래는 신설 대상만.
 FIELDS = [
-    ("Start date", "DATE", None),
-    ("Target date", "DATE", None),
-    ("Duration (d)", "NUMBER", None),
     ("Week", "NUMBER", None),
     ("Track", "SINGLE_SELECT", list(TRACK.values())),
     ("Lane", "TEXT", None),
@@ -35,10 +34,10 @@ FIELDS = [
                                "RSV", "MCH", "AGR", "ANA", "SEC", "REL", "TST", "UX"]),
     ("Task type", "SINGLE_SELECT", ["Contract", "Data", "Read", "Write", "UI",
                                     "Test", "Infra", "NFR", "Design"]),
-    ("Complexity", "SINGLE_SELECT", ["H", "M", "L"]),
     ("Phase", "SINGLE_SELECT", list(PHASE.values())),
     ("Sprint", "SINGLE_SELECT", ["S-1", "S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"]),
     ("Critical path", "SINGLE_SELECT", ["Yes", "No"]),
+    ("Complexity note", "TEXT", None),
     ("Depends on", "TEXT", None),
     ("Blocks", "TEXT", None),
     ("Task ID", "TEXT", None),
@@ -118,13 +117,17 @@ def set_values():
             "Task ID": ("text", tid),
             "Start date": ("date", v["start"]),
             "Target date": ("date", v["end"]),
-            "Duration (d)": ("number", v["duration"]),
+            "Estimate": ("number", v["duration"]),
+            "Size": ("opt", {"H": "L", "M": "M", "L": "XS"}[v["complexity"]]),
+            "Status": ("opt", "Backlog"),
+            "Priority": ("opt", "P0" if v["critical"] else
+                         ("P1" if len(v["blocks"]) >= 3 else "P2")),
             "Week": ("number", v["week"]),
             "Track": ("opt", TRACK[v["track"]]),
             "Lane": ("text", v["lane"]),
             "Epic": ("opt", tid.split("-")[0]),
             "Task type": ("opt", v["type"]),
-            "Complexity": ("opt", v["complexity"]),
+            "Complexity note": ("text", f"{v['complexity']} · {v['duration']}d"),
             "Phase": ("opt", PHASE[v["phase"]]),
             "Sprint": ("opt", v["sprint"]),
             "Critical path": ("opt", "Yes" if v["critical"] else "No"),
