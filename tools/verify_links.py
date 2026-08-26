@@ -11,9 +11,22 @@
 않는다. 원본 PRD 가 다른 작업공간에서 작성될 때 걸린 링크로, 이 저장소가
 해결할 수 있는 대상이 아니다.
 """
-import os, re, sys, collections, urllib.parse
+import os, re, sys, json, collections, urllib.parse
 
-SKIP_DIRS = {".git", "__pycache__", "node_modules"}
+SKIP_DIRS = {".git", "__pycache__", "node_modules", ".next"}
+
+
+def vendored_skills():
+    """마켓플레이스에서 설치한 스킬 디렉터리.
+
+    `npx skills add` 가 받아온 서드파티 문서라 내부 링크는 우리가 고칠 대상이
+    아니다. skills-lock.json 이 설치 목록의 원천이므로 이름을 거기서 읽는다."""
+    try:
+        with open("skills-lock.json", encoding="utf-8") as f:
+            names = json.load(f).get("skills", {}).keys()
+    except (OSError, ValueError):
+        return set()
+    return {os.path.normpath(f".agents/skills/{n}") for n in names}
 EXTERNAL_PREFIX = ("../VPS/", "../JTBD/", "../OS/", "../CJM/", "../Persona/")
 
 
@@ -34,9 +47,11 @@ def strip_code(t):
 
 
 def md_files():
+    skip = vendored_skills()
     out = []
     for root, dirs, files in os.walk("."):
-        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS
+                   and os.path.normpath(os.path.join(root, d)[2:]) not in skip]
         out += [os.path.join(root, f)[2:] for f in files if f.endswith(".md")]
     return sorted(out)
 
@@ -76,7 +91,8 @@ def main():
                     broken[p].append((ln, path + anc, "앵커 없음"))
 
     n = sum(len(v) for v in broken.values())
-    print(f"문서 {len(files)}개 · 내부 링크 {total}건 · 리포 밖 참조 {external}건 제외")
+    print(f"문서 {len(files)}개 · 내부 링크 {total}건 · 리포 밖 참조 {external}건 제외"
+          f" · 설치 스킬 {len(vendored_skills())}종 제외")
     for p in sorted(broken):
         print(f"■ {p}")
         for ln, tgt, why in broken[p]:

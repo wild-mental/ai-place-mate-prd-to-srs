@@ -75,6 +75,27 @@ docs/
 
 `docs/tasks/` 만 이름을 그대로 뒀습니다. 파일명이 이미 태스크 ID(`DAT-001.md`)이고, 등록된 GitHub Issue 59건이 이 경로로 매핑돼 있습니다.
 
+### AI 개발 하네스
+
+이 저장소는 **기획이 끝나고 구현이 시작되지 않은 상태**다. AI 코딩 에이전트가
+확정된 제약(C-TEC-001~007)과 태스크 59건을 벗어나지 않도록 하네스를 세팅했다.
+
+```
+AGENTS.md          도구 공통 규칙 (Claude Code · Cursor · Antigravity · Gemini CLI · Codex …)
+CLAUDE.md          Claude Code 진입점 — 짧게 유지하고 스킬로 라우팅
+.agents/rules/     상세 규칙 3종 (항상 적용)
+.agents/skills/    스킬 20종 (SSOT) — 자체 10 + 마켓플레이스 10
+.claude/agents/    서브에이전트 4종
+```
+
+| 구분 | 내용 |
+| --- | --- |
+| 자체 작성 스킬 | 제약 가드레일 · 서버 경계 · 데이터 접근 · AI 통합 · 태스크 실행 · 에러 진단 · 빌드/환경 · Git · 주석 · GitHub 운영 |
+| 마켓플레이스 스킬 | `vercel-react-best-practices` · `ai-sdk` · `shadcn` · `supabase` · `supabase-postgres-best-practices` · `prisma-client-api` · `prisma-database-setup` · `web-design-guidelines` · `tdd` · `webapp-testing` |
+| 서브에이전트 | `nextjs-server` · `prisma-data` · `ai-gemini` · `ui-shadcn` |
+
+구성 근거와 채택·제외 판단은 **`docs/ops-docs/[Ops]AI-Harness-Guide.md`** 에 있다.
+
 ---
 
 ## 3. 포맷 기준 — 예시 SRS의 골격
@@ -340,6 +361,7 @@ docs/plan-docs/[TaskList]AI-Place-Mate-Task-List.md   ← 생성물 · 직접 �
 | `tools/gen_task_list.py` | 태스크 리스트 생성 (`--check` 로 데이터-문서 일치 확인) |
 | `tools/add_anchors.py` | SRS 요구사항 앵커 삽입 (`--check` · 멱등) |
 | `tools/make_task_template.py` | GitHub 이슈 템플릿 생성 |
+| `skills-lock.json` | 마켓플레이스 스킬 설치 목록 (`npx skills` 관리) |
 | `tools/verify_links.py` | 마크다운 링크·앵커 무결성 검사 (문서 이동 후 필수) |
 | `tools/verify_docs.py` | 표 열 정합 · mermaid 추출 · 앵커 집계 |
 

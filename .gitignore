@@ -1,6 +1,8 @@
 
 __pycache__/
 .DS_Store
+.next/
 # macOS
 # 저작권 보호 표준 원문 (로컬 참조 전용 · 공개 저장소에 배포하지 않음)
 29148-2018-ISOIECIEEE.pdf
+node_modules/
