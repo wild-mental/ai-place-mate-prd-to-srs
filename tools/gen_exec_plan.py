@@ -131,6 +131,31 @@ def workday(idx):
     return cur
 
 
+STYLE = {"Contract": "ctr", "Data": "dat", "Infra": "inf", "UI": "ui", "Read": "rd",
+         "Write": "wr", "Test": "tst", "NFR": "nfr", "Design": "dsg"}
+STYLE_DEF = [
+    ("ctr", "#f8d7da,stroke:#dc3545"), ("dat", "#fff3cd,stroke:#e0a800"),
+    ("inf", "#e2e3e5,stroke:#6c757d"), ("rd", "#e7f1ff,stroke:#0d6efd"),
+    ("wr", "#d1e7dd,stroke:#198754"), ("tst", "#ede7f6,stroke:#7e57c2"),
+    ("nfr", "#cff4fc,stroke:#0dcaf0"), ("dsg", "#fce4ec,stroke:#ec407a"),
+    ("ui", "#e0f2f1,stroke:#009688"),
+]
+PHASE = {"S-1": "P0", "S0": "P0", "S1": "P1", "S2": "P1", "S3": "P1", "S4": "P1",
+         "S5": "P1말", "S6": "P1말", "S7": "P2", "S8": "P2"}
+PHASE_NAME = {"P0": "P0 기반 · 계약", "P1": "P1 클로즈드 베타",
+              "P1말": "P1 말 · 예약·결제", "P2": "P2 오픈 베타"}
+PHASE_ORDER = ["P0", "P1", "P1말", "P2"]
+
+
+def nid(t):
+    return t.replace("-", "")
+
+
+def emit_styles(A):
+    for c, f in STYLE_DEF:
+        A(f"    classDef {c} fill:{f}")
+
+
 def gname(t):
     """간트 라벨 — 콜론·괄호 제거"""
     s = BY[t][1].replace(":", " ").replace("`", "")
@@ -270,32 +295,149 @@ def build():
     A(f"**레벨 {len(wv)}단계** — 자원이 무한해도 이보다 적은 단계로 끝낼 수 없다. "
       f"실제로는 자원 제약 때문에 아래 §3의 일정이 적용된다.")
     A("")
-    A("### 2.2 임계 경로")
+    # ── 2.2 Epic 수준 ────────────────────────────────
+    A("### 2.2 Epic 수준 의존 구조")
     A("")
-    A(f"**{len(CP)}단계 · {CP_LEN}영업일.** 인원을 늘려도 이보다 빨라지지 않는다. "
-      "이 사슬 위의 태스크가 하루 밀리면 전체가 하루 밀린다.")
+    A("**이 그림이 말하는 것:** 태스크 59건을 Epic 16개로 접었을 때의 큰 그림이다. "
+      "화살표는 \"이 Epic이 저 Epic의 결과를 필요로 한다\"는 뜻이며, 개별 태스크 간선을 "
+      "Epic 단위로 합친 것이다.")
+    A("")
+    ee = defaultdict(set)
+    for t in IDS:
+        for p in BY[t][3]:
+            if p.split("-")[0] != t.split("-")[0]:
+                ee[t.split("-")[0]].add(p.split("-")[0])
+    # Epic 수준 순환 탐지
+    st_, cyc = {}, []
+    def _d(n, path):
+        if st_.get(n) == 1:
+            cyc.append(path[path.index(n):] + [n])
+            return
+        if st_.get(n) == 2:
+            return
+        st_[n] = 1
+        for m in ee.get(n, ()):
+            _d(m, path + [n])
+        st_[n] = 2
+    for e0 in sorted({t.split("-")[0] for t in IDS}):
+        _d(e0, [])
+    cyc_pairs = {tuple(sorted(c[:2])) for c in cyc}
+    epic_role = {}
+    for t in IDS:
+        epic_role.setdefault(t.split("-")[0], BY[t][5])
+    A("```mermaid")
+    A("flowchart LR")
+    for e0 in D.PART_A_ORDER + D.PART_B_ORDER:
+        cnt = sum(1 for t in IDS if t.startswith(e0 + "-"))
+        if cnt:
+            A(f'    {e0}["{e0}<br/>{D.EPIC_NAME[e0]}<br/>{cnt}건"]:::{STYLE[epic_role[e0]]}')
+    for tgt in sorted(ee):
+        for src in sorted(ee[tgt]):
+            dashed = tuple(sorted((src, tgt))) in cyc_pairs
+            A(f"    {src} -.-> {tgt}" if dashed else f"    {src} --> {tgt}")
+    emit_styles(A)
+    A("```")
+    A("")
+    if cyc_pairs:
+        pr = " · ".join(f"`{a}` ↔ `{b}`" for a, b in sorted(cyc_pairs))
+        A(f"> ⚠️ **점선은 Epic 수준에서만 생기는 양방향 관계**다 ({pr}). "
+          "태스크 수준에서는 순환이 없다 — `QRY-005` 가 `ANA-002`(계측 태깅)를 필요로 하고, "
+          "`ANA-007`(AI 비용 집계)이 `QRY-002` 를 필요로 하는 **서로 다른 태스크 쌍**이기 때문이다. "
+          "Epic으로 접으면서 생긴 착시이므로 착수 순서에 영향을 주지 않는다.")
+        A("")
+    A(f"Epic 간 간선 {sum(len(v) for v in ee.values())}개. "
+      "`INF` → `DAT` → `CTR` 이 모든 갈래의 뿌리이고, `UX` 는 `INF`·`RNK`·`MCH`·`AGR`·`EVD`·`RSV` "
+      "여섯 갈래로 뻗는다 — 디자인이 늦으면 여섯 곳이 동시에 막힌다.")
+    A("")
+    # ── 2.3 전체 DAG ─────────────────────────────────
+    A("### 2.3 전체 태스크 DAG")
+    A("")
+    A("**이 그림이 말하는 것:** 태스크 59건과 의존 간선 "
+      f"{sum(len(BY[t][3]) for t in IDS)}개 전부다. 세로 묶음(`L0`~`L{max(LV.values())}`)이 "
+      "DAG 레벨이며, **같은 묶음 안의 태스크는 서로 의존하지 않아 동시에 착수할 수 있다.** "
+      "왼쪽에서 오른쪽으로 갈수록 나중에 시작한다.")
+    A("")
+    A("> 화면이 넓지 않으면 가로 스크롤로 본다. 읽기 편한 단위는 §2.4의 Phase별 DAG다.")
+    A("")
+    wv2 = defaultdict(list)
+    for t in IDS:
+        wv2[LV[t]].append(t)
+    A("```mermaid")
+    A("flowchart LR")
+    for k in sorted(wv2):
+        A(f'    subgraph LV{k}["L{k}"]')
+        A("        direction TB")
+        for t in sorted(wv2[k]):
+            mark = "◆" if t in CP else ""
+            A(f'        {nid(t)}["{mark}{t}"]:::{STYLE[BY[t][5]]}')
+        A("    end")
+    for t in IDS:
+        for p in BY[t][3]:
+            assert p in BY, f"미정의 선행 {p}"
+            A(f"    {nid(p)} --> {nid(t)}")
+    emit_styles(A)
+    A("```")
+    A("")
+    A("**◆ 표시가 임계 경로**(§2.5) 위의 태스크다. 색은 유형을 뜻한다 — "
+      + " · ".join(f"`{k}`" for k in ["Infra", "Data", "Contract", "Read", "Write", "UI", "NFR", "Test", "Design"])
+      + " 순으로 회색·노랑·빨강·파랑·초록·청록·하늘·보라·분홍.")
+    A("")
+    # ── 2.4 Phase별 ──────────────────────────────────
+    A("### 2.4 Phase별 상세 DAG")
+    A("")
+    A("전체 DAG를 실무 단위로 자른 것이다. **실선 노드가 해당 Phase에서 수행하는 태스크**, "
+      "점선 노드는 앞 Phase에서 이미 끝난 선행이다.")
+    A("")
+    grp = defaultdict(list)
+    for t in IDS:
+        grp[PHASE[BY[t][6]]].append(t)
+    for ph in PHASE_ORDER:
+        ts = sorted(grp.get(ph, []))
+        if not ts:
+            continue
+        inset = set(ts)
+        ext = sorted({p for t in ts for p in BY[t][3] if p not in inset})
+        intra = sum(1 for t in ts for p in BY[t][3] if p in inset)
+        A(f"#### {PHASE_NAME[ph]} — {len(ts)}건")
+        A("")
+        A(f"내부 간선 {intra}개 · 외부 선행 {len(ext)}건"
+          + (f" ({' · '.join(f'`{x}`' for x in ext)})" if ext else "") + ".")
+        A("")
+        A("```mermaid")
+        A("flowchart LR")
+        if ext:
+            A('    subgraph EXT["이전 Phase 완료분"]')
+            A("        direction TB")
+            for x in ext:
+                A(f'        e{nid(x)}["{x}"]:::ext')
+            A("    end")
+        for t in ts:
+            mark = "◆" if t in CP else ""
+            A(f'    {nid(t)}["{mark}{t}<br/>{gname(t)}<br/>{dur[t]}d"]:::{STYLE[BY[t][5]]}')
+        for t in ts:
+            for p in BY[t][3]:
+                A(f"    {'e' + nid(p) if p in ext else nid(p)} --> {nid(t)}")
+        emit_styles(A)
+        A("    classDef ext fill:#fafafa,stroke:#bdbdbd,stroke-dasharray: 4 3,color:#757575")
+        A("```")
+        A("")
+    # ── 2.5 임계 경로 ────────────────────────────────
+    A("### 2.5 임계 경로")
+    A("")
+    A(f"**{len(CP)}단계 · {CP_LEN}영업일.** 위 DAG에서 가장 긴 사슬만 뽑은 것이다. "
+      "인원을 늘려도 이보다 빨라지지 않으며, 이 사슬 위의 태스크가 하루 밀리면 전체가 하루 밀린다.")
     A("")
     A("```mermaid")
     A("flowchart LR")
-    st = {"Contract": "ctr", "Data": "dat", "Infra": "inf", "UI": "ui",
-          "Read": "rd", "Write": "wr", "Test": "tst", "NFR": "nfr", "Design": "dsg"}
     for c in CP:
-        A(f'    {c.replace("-","")}["{c}<br/>{gname(c)}<br/>{dur[c]}d"]:::{st[BY[c][5]]}')
+        A(f'    {nid(c)}["{c}<br/>{gname(c)}<br/>{dur[c]}d"]:::{STYLE[BY[c][5]]}')
     for a, b in zip(CP, CP[1:]):
         assert a in BY[b][3], f"허위 간선 {a}→{b}"
-        A(f'    {a.replace("-","")} --> {b.replace("-","")}')
-    A("    classDef ctr fill:#f8d7da,stroke:#dc3545,font-weight:bold")
-    A("    classDef dat fill:#fff3cd,stroke:#e0a800")
-    A("    classDef inf fill:#e2e3e5,stroke:#6c757d")
-    A("    classDef rd fill:#e7f1ff,stroke:#0d6efd")
-    A("    classDef wr fill:#d1e7dd,stroke:#198754")
-    A("    classDef tst fill:#ede7f6,stroke:#7e57c2")
-    A("    classDef nfr fill:#cff4fc,stroke:#0dcaf0")
-    A("    classDef dsg fill:#fce4ec,stroke:#ec407a")
-    A("    classDef ui fill:#e0f2f1,stroke:#009688")
+        A(f"    {nid(a)} --> {nid(b)}")
+    emit_styles(A)
     A("```")
     A("")
-    A("### 2.3 병목 — 후행이 많은 태스크")
+    A("### 2.6 병목 — 후행이 많은 태스크")
     A("")
     A("아래 태스크가 밀리면 괄호 안 수만큼이 **직접** 밀린다. 리뷰를 최우선으로 배정한다.")
     A("")
@@ -305,7 +447,7 @@ def build():
         A(f"| [`{t}`](../docs/tasks/{t}.md) | `{BY[t][5]}` | **{len(b)}건** | "
           f"{'✅ 포함' if t in CP else '—'} | {dur[t]}d |")
     A("")
-    A("### 2.4 병렬 가능성이 큰 구간")
+    A("### 2.7 병렬 가능성이 큰 구간")
     A("")
     wide = sorted(wv.items(), key=lambda kv: -len(kv[1]))[:3]
     for k, ts in wide:
