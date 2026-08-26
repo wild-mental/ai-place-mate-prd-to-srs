@@ -3,7 +3,7 @@
 """개발 실행 계획(총괄 문서) 생성기.
 
 `tasks_data.py` 를 단일 원천으로 DAG 레벨 · 임계 경로 · 자원 제약 일정을 계산하고
-`docs/[총괄] 개발 실행 계획.md` 를 생성한다. 일정의 모든 간선은 실재하는 의존성이다.
+`docs/plan-docs/[Plan]AI-Place-Mate-Execution-Plan.md` 를 생성한다. 일정의 모든 간선은 실재하는 의존성이다.
 """
 import sys, os, re, datetime as dt
 from collections import defaultdict, Counter
@@ -11,7 +11,7 @@ from collections import defaultdict, Counter
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import tasks_data as D
 
-OUT = "docs/[총괄] 개발 실행 계획.md"
+OUT = "docs/plan-docs/[Plan]AI-Place-Mate-Execution-Plan.md"
 BY = {t[0]: t for t in D.TASKS}
 IDS = list(BY)
 DUR = {"H": 5, "M": 3, "L": 1}                 # 복잡도 → 소요 영업일
@@ -180,7 +180,7 @@ def build():
     A("")
     A(f"**날짜:** 2026-08-25")
     A("")
-    A("**근거 문서:** TASK-AIPLACE-MVP-001 v3.2 (`[태스크 리스트] AI-Place-Mate.md` · 59건) · "
+    A("**근거 문서:** TASK-AIPLACE-MVP-001 v3.2 (`[TaskList]AI-Place-Mate-Task-List.md` · 59건) · "
       "`docs/tasks/*.md` (태스크별 이슈 명세 59건)")
     A("")
     A("> ⚙️ **이 문서는 생성물이다.** 단일 원천은 `tools/tasks_data.py` 이며 "
@@ -444,7 +444,7 @@ def build():
     A("| 태스크 | 유형 | 직접 후행 | 임계 경로 | 소요 |")
     A("| --- | --- | --- | --- | --- |")
     for t, b in sorted(BLOCKS.items(), key=lambda kv: -len(kv[1]))[:8]:
-        A(f"| [`{t}`](../docs/tasks/{t}.md) | `{BY[t][5]}` | **{len(b)}건** | "
+        A(f"| [`{t}`](../tasks/{t}.md) | `{BY[t][5]}` | **{len(b)}건** | "
           f"{'✅ 포함' if t in CP else '—'} | {dur[t]}d |")
     A("")
     A("### 2.7 병렬 가능성이 큰 구간")
@@ -625,7 +625,7 @@ def add_risk(A):
     A("tools/gen_exec_plan.py  ← DUR · CAP(트랙 수) · START 수정")
     A("        ↓")
     A("python3 tools/gen_exec_plan.py")
-    A("docs/[총괄] 개발 실행 계획.md   ← 재생성 (일정 · Gantt 전부 갱신)")
+    A("docs/plan-docs/[Plan]AI-Place-Mate-Execution-Plan.md   ← 재생성 (일정 · Gantt 전부 갱신)")
     A("```")
     A("")
     A("---")

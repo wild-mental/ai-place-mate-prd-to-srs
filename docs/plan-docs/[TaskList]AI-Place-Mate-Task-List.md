@@ -6,7 +6,7 @@
 
 **날짜:** 2026-08-25
 
-**근거 문서:** SRS-AIPLACE-TEC-001 v1.0 (`[SRS 문서] AI-Place-Mate (기술제약 반영판).md`)
+**근거 문서:** SRS-AIPLACE-TEC-001 v1.0 (`[SRS]AI-Place-Mate-SRS-v1_0.md`)
 
 **참조 문서:** SRS-AIPLACE-MVP-001 (기술 중립판) · SDD-AIPLACE-MVP-001 (설계 문서) · ANL-AIPLACE-TASK-001 (방법론 적합성 평가) · ANL-AIPLACE-TASK-002 (축약 검토 — 본 개정의 근거)
 

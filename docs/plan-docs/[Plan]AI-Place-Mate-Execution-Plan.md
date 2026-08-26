@@ -6,7 +6,7 @@
 
 **날짜:** 2026-08-25
 
-**근거 문서:** TASK-AIPLACE-MVP-001 v3.2 (`[태스크 리스트] AI-Place-Mate.md` · 59건) · `docs/tasks/*.md` (태스크별 이슈 명세 59건)
+**근거 문서:** TASK-AIPLACE-MVP-001 v3.2 (`[TaskList]AI-Place-Mate-Task-List.md` · 59건) · `docs/tasks/*.md` (태스크별 이슈 명세 59건)
 
 > ⚙️ **이 문서는 생성물이다.** 단일 원천은 `tools/tasks_data.py` 이며 `python3 tools/gen_exec_plan.py` 로 재생성한다. **일정의 모든 선후 관계는 `선행 태스크` 열에 실재하는 의존성**이며, 임의로 그린 간선이 없다.
 
@@ -788,14 +788,14 @@ flowchart LR
 
 | 태스크 | 유형 | 직접 후행 | 임계 경로 | 소요 |
 | --- | --- | --- | --- | --- |
-| [`DAT-001`](../docs/tasks/DAT-001.md) | `Data` | **15건** | ✅ 포함 | 5d |
-| [`INF-001`](../docs/tasks/INF-001.md) | `Infra` | **14건** | ✅ 포함 | 3d |
-| [`CTR-001`](../docs/tasks/CTR-001.md) | `Contract` | **12건** | ✅ 포함 | 5d |
-| [`INF-003`](../docs/tasks/INF-003.md) | `Infra` | **7건** | ✅ 포함 | 3d |
-| [`CTR-002`](../docs/tasks/CTR-002.md) | `Contract` | **7건** | — | 3d |
-| [`UX-001`](../docs/tasks/UX-001.md) | `Design` | **6건** | — | 3d |
-| [`ANA-002`](../docs/tasks/ANA-002.md) | `Write` | **4건** | — | 5d |
-| [`QRY-002`](../docs/tasks/QRY-002.md) | `Infra` | **4건** | ✅ 포함 | 5d |
+| [`DAT-001`](../tasks/DAT-001.md) | `Data` | **15건** | ✅ 포함 | 5d |
+| [`INF-001`](../tasks/INF-001.md) | `Infra` | **14건** | ✅ 포함 | 3d |
+| [`CTR-001`](../tasks/CTR-001.md) | `Contract` | **12건** | ✅ 포함 | 5d |
+| [`INF-003`](../tasks/INF-003.md) | `Infra` | **7건** | ✅ 포함 | 3d |
+| [`CTR-002`](../tasks/CTR-002.md) | `Contract` | **7건** | — | 3d |
+| [`UX-001`](../tasks/UX-001.md) | `Design` | **6건** | — | 3d |
+| [`ANA-002`](../tasks/ANA-002.md) | `Write` | **4건** | — | 5d |
+| [`QRY-002`](../tasks/QRY-002.md) | `Infra` | **4건** | ✅ 포함 | 5d |
 
 ### 2.7 병렬 가능성이 큰 구간
 
@@ -1004,7 +1004,7 @@ tools/tasks_data.py     ← 태스크 · 의존성 · 복잡도 수정
 tools/gen_exec_plan.py  ← DUR · CAP(트랙 수) · START 수정
         ↓
 python3 tools/gen_exec_plan.py
-docs/[총괄] 개발 실행 계획.md   ← 재생성 (일정 · Gantt 전부 갱신)
+docs/plan-docs/[Plan]AI-Place-Mate-Execution-Plan.md   ← 재생성 (일정 · Gantt 전부 갱신)
 ```
 
 ---

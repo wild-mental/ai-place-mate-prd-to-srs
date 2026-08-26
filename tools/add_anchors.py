@@ -13,8 +13,8 @@
 import sys, re
 
 TARGETS = [
-    "docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md",
-    "docs/[SRS 문서] AI-Place-Mate (한글).md",
+    "docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v1_0.md",
+    "docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v0_1.md",
 ]
 # 요구사항 표의 첫 열: | **REQ-FUNC-001** |  또는  | **REQ-NF-001a** |
 ROW = re.compile(r'^\|\s*(?!<a )\*\*(REQ-(?:FUNC|NF|TEC)-\d+[ab]?)\*\*\s*\|')

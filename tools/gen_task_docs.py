@@ -18,10 +18,10 @@ import tasks_data as D
 import task_specs as S
 
 OUT = "docs/tasks"
-TASK_DOC = "/docs/[태스크 리스트] AI-Place-Mate.md"
-SRS_TEC = "/docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md"
-SRS_NEU = "/docs/[SRS 문서] AI-Place-Mate (한글).md"
-SDD = "/docs/[설계 문서] AI-Place-Mate (한글).md"
+TASK_DOC = "/docs/plan-docs/[TaskList]AI-Place-Mate-Task-List.md"
+SRS_TEC = "/docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v1_0.md"
+SRS_NEU = "/docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v0_1.md"
+SDD = "/docs/tech-design-docs/[Diagrams]AI-Place-Mate-Diagrams.md"
 
 BY = {t[0]: t for t in D.TASKS}
 BLOCKS = defaultdict(list)

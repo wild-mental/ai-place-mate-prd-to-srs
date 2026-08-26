@@ -22,10 +22,10 @@ for tid, _, _, deps, _, _, _ in D.TASKS:
         BLOCKS.setdefault(d, []).append(tid)
 
 ANCHOR_DOCS = {
-    "[태스크 리스트] AI-Place-Mate.md": "docs/[태스크 리스트] AI-Place-Mate.md",
-    "[SRS 문서] AI-Place-Mate (기술제약 반영판).md": "docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md",
-    "[SRS 문서] AI-Place-Mate (한글).md": "docs/[SRS 문서] AI-Place-Mate (한글).md",
-    "[설계 문서] AI-Place-Mate (한글).md": "docs/[설계 문서] AI-Place-Mate (한글).md",
+    "[TaskList]AI-Place-Mate-Task-List.md": "docs/plan-docs/[TaskList]AI-Place-Mate-Task-List.md",
+    "[SRS]AI-Place-Mate-SRS-v1_0.md": "docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v1_0.md",
+    "[SRS]AI-Place-Mate-SRS-v0_1.md": "docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v0_1.md",
+    "[Diagrams]AI-Place-Mate-Diagrams.md": "docs/tech-design-docs/[Diagrams]AI-Place-Mate-Diagrams.md",
 }
 
 

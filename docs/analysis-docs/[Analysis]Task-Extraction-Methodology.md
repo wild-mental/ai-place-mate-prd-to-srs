@@ -4,7 +4,7 @@
 
 **날짜:** 2026-08-25
 
-**평가 대상:** TASK-AIPLACE-MVP-001 (`[태스크 리스트] AI-Place-Mate.md` · 97건)
+**평가 대상:** TASK-AIPLACE-MVP-001 (`[TaskList]AI-Place-Mate-Task-List.md` · 97건)
 
 **평가 기준:** 4단계 태스크 추출 방법론 (계약·데이터 → 로직 → 테스트 → NFR·의존성)
 
@@ -292,4 +292,4 @@ P5(21건)만 2회로 나누면 충분하다. **총 6회 프롬프팅으로 56건
 
 **ANL-AIPLACE-TASK-001 · 2026-08-25 · Owner 5팀**
 
-관련 문서: `[태스크 리스트] AI-Place-Mate.md` · `[SRS 문서] AI-Place-Mate (기술제약 반영판).md` · `.github/ISSUE_TEMPLATE/feature-task.md`
+관련 문서: `[TaskList]AI-Place-Mate-Task-List.md` · `[SRS]AI-Place-Mate-SRS-v1_0.md` · `.github/ISSUE_TEMPLATE/feature-task.md`

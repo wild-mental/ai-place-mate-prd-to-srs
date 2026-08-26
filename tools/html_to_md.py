@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""ai-place-prd-v0.1.html -> Markdown (구조 보존 변환기)"""
+"""docs/source-docs/[PRD]AI-Place-Mate-PRD-v0_1.html -> Markdown (구조 보존 변환기)"""
 import re, sys, html
 from html.parser import HTMLParser
 
-SRC = 'ai-place-prd-v0.1.html'
-OUT = 'ai-place-prd-v0.1.md'
+SRC = 'docs/source-docs/[PRD]AI-Place-Mate-PRD-v0_1.html'
+OUT = 'docs/source-docs/[PRD]AI-Place-Mate-PRD-v0_1.md'
 
 VOID = {'br','hr','img','meta','link','input','i'}
 
@@ -317,7 +317,7 @@ title=ptext(collect(bld.root,'title',[])[0])
 doc=[]
 doc.append(f'# {title}')
 doc.append('')
-doc.append('> 원본 `ai-place-prd-v0.1.html` 을 내용 손실 없이 Markdown으로 변환한 문서입니다.')
+doc.append('> 원본 `docs/source-docs/[PRD]AI-Place-Mate-PRD-v0_1.html` 을 내용 손실 없이 Markdown으로 변환한 문서입니다.')
 doc.append('> 원본은 15장 슬라이드 덱이며, 각 슬라이드를 `---` 로 구분했습니다.')
 doc.append('> 표·mermaid 다이어그램·수용 기준 임계치는 원문 값을 그대로 보존했습니다.')
 doc.append('')

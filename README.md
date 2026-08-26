@@ -10,9 +10,9 @@
 
 ### 1.1 하는 일
 
-> **기준 템플릿은 `[SRS 문서] AD-Core-Platform (한글).md` 하나입니다.**
+> **기준 템플릿은 `docs/source-docs/[SRS]AD-Core-Platform-Reference.md` 하나입니다.**
 
-`ai-place-prd-v0.1.html` 에 담긴 내용을, 예시 SRS 문서가 이미 쓰고 있는 섹션 구성·표 스키마·ID 체계·서술 톤으로 옮겨 적습니다. 도메인만 다를 뿐(광고 플랫폼 → 장소 큐레이션), 문서의 **뼈대는 예시 문서를 그대로 따릅니다.**
+`docs/source-docs/[PRD]AI-Place-Mate-PRD-v0_1.html` 에 담긴 내용을, 예시 SRS 문서가 이미 쓰고 있는 섹션 구성·표 스키마·ID 체계·서술 톤으로 옮겨 적습니다. 도메인만 다를 뿐(광고 플랫폼 → 장소 큐레이션), 문서의 **뼈대는 예시 문서를 그대로 따릅니다.**
 
 ### 1.2 하지 않는 일
 
@@ -42,22 +42,38 @@ PRD에는 예시 SRS의 7개 섹션 어디에도 자연스럽게 들어가지 �
 
 | 파일 | 역할 |
 | --- | --- |
-| `ai-place-prd-v0.1.html` | **변환 입력물(원본).** AI 장소 큐레이션 PRD v0.1 (15장 덱, mermaid 다이어그램 포함) |
-| `ai-place-prd-v0.1.md` | 위 HTML을 내용 손실 없이 옮긴 Markdown (v0.1 초안 · 무손실 검증 기준선) |
-| `ai-place-prd-v1_0.md` | **SRS 변환 입력물.** 완성도 6기준을 적용해 개정한 PRD v1.0 — 가설 경고 제거, 측정 창구·실패 AC·공수·ADR 보강 |
+| `docs/source-docs/[PRD]AI-Place-Mate-PRD-v0_1.html` | **변환 입력물(원본).** AI 장소 큐레이션 PRD v0.1 (15장 덱, mermaid 다이어그램 포함) |
+| `docs/source-docs/[PRD]AI-Place-Mate-PRD-v0_1.md` | 위 HTML을 내용 손실 없이 옮긴 Markdown (v0.1 초안 · 무손실 검증 기준선) |
+| `docs/tech-design-docs/[PRD]AI-Place-Mate-PRD-v1_0.md` | **SRS 변환 입력물.** 완성도 6기준을 적용해 개정한 PRD v1.0 — 가설 경고 제거, 측정 창구·실패 AC·공수·ADR 보강 |
 | `tools/` | HTML→MD 변환기와 무손실 검증 스크립트 |
-| `[SRS 문서] AD-Core-Platform (한글).md` | **포맷 기준.** 다른 도메인의 완성된 한글 SRS. 이 문서의 골격을 따름 |
+| `docs/source-docs/[SRS]AD-Core-Platform-Reference.md` | **포맷 기준.** 다른 도메인의 완성된 한글 SRS. 이 문서의 골격을 따름 |
 | `29148-2018-ISOIECIEEE.pdf` | **확장 근거.** 1.3의 확장이 필요할 때만 참조 (저작권 문제로 저장소에 포함하지 않음 · 로컬 전용) |
-| `docs/[SRS 문서] AI-Place-Mate (한글).md` | **산출물 ①.** PRD v1.0을 예시 SRS 양식으로 변환한 SRS (1–7장 양식 준수 · 8–14장 29148 확장 · 다이어그램 9개 배치) |
-| `docs/[설계 문서] AI-Place-Mate (한글).md` | **산출물 ②.** SRS에서 도출한 기술 설계 문서 (SDD) — 다이어그램 32개 |
-| `docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md` | **산출물 ③.** 기술 제약 C-TEC-001~007을 적용한 병렬 SRS (Next.js 단일 스택) |
-| `docs/[태스크 리스트] AI-Place-Mate.md` | **산출물 ④.** 실행 태스크 **59건** (Epic 16 · 유형 · 선행/후행 · 복잡도). `tools/tasks_data.py` 에서 **생성** — 직접 편집 금지 |
-| `docs/[분석] 태스크 추출 방법론 적합성 평가.md` | **산출물 ⑤.** 4단계 추출 방법론 기준 갭 분석 및 풀버전 작성 순서 |
+| `docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v0_1.md` | **산출물 ①.** PRD v1.0을 예시 SRS 양식으로 변환한 SRS (1–7장 양식 준수 · 8–14장 29148 확장 · 다이어그램 9개 배치) |
+| `docs/tech-design-docs/[Diagrams]AI-Place-Mate-Diagrams.md` | **산출물 ②.** SRS에서 도출한 기술 설계 문서 (SDD) — 다이어그램 32개 |
+| `docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v1_0.md` | **산출물 ③.** 기술 제약 C-TEC-001~007을 적용한 병렬 SRS (Next.js 단일 스택) |
+| `docs/plan-docs/[TaskList]AI-Place-Mate-Task-List.md` | **산출물 ④.** 실행 태스크 **59건** (Epic 16 · 유형 · 선행/후행 · 복잡도). `tools/tasks_data.py` 에서 **생성** — 직접 편집 금지 |
+| `docs/analysis-docs/[Analysis]Task-Extraction-Methodology.md` | **산출물 ⑤.** 4단계 추출 방법론 기준 갭 분석 및 풀버전 작성 순서 |
 | `.github/ISSUE_TEMPLATE/feature-task.md` | GitHub Project 용 TASK 템플릿 (`tools/make_task_template.py` 생성) |
 | `docs/tasks/*.md` | **산출물 ⑥.** 태스크별 GitHub Issue 명세 (P1 진행 중 · 3건) |
-| `docs/[분석] 태스크 축약 가능성 검토.md` | **산출물 ⑦.** 118 → 56건 병합안 (**적용 완료** · 이후 3건 승격 = 59건) |
-| `docs/[총괄] 개발 실행 계획.md` | **산출물 ⑧.** 실행 전략 · DAG 3단계 · 자원 제약 Gantt (6명 · 72일) |
-| `docs/[총괄] 압축 수행 일정.md` | **산출물 ⑨.** 최대 병렬 압축안 (9명 · 63일 · 임계 경로 하한) |
+| `docs/analysis-docs/[Analysis]Task-Consolidation-Review.md` | **산출물 ⑦.** 118 → 56건 병합안 (**적용 완료** · 이후 3건 승격 = 59건) |
+| `docs/plan-docs/[Plan]AI-Place-Mate-Execution-Plan.md` | **산출물 ⑧.** 실행 전략 · DAG 3단계 · 자원 제약 Gantt (6명 · 72일) |
+| `docs/plan-docs/[Plan]AI-Place-Mate-Fast-Track-Schedule.md` | **산출물 ⑨.** 최대 병렬 압축안 (9명 · 63일 · 임계 경로 하한) |
+
+### 저장소 구조
+
+문서는 **역할별 디렉터리**로 나누고, 파일명은 `[분류]이름-v버전.md` 규칙을 씁니다. 공백과 한글을 파일명에서 뺀 이유는 URL·셸·CI에서 이스케이프가 필요 없게 하기 위해서입니다.
+
+```
+docs/
+├── source-docs/       변환 입력물 — 원본 PRD(HTML)와 무손실 변환본, 포맷 기준 예시 SRS
+├── tech-design-docs/  기술 문서 — PRD v1.0 · SRS v0.1(기술 중립) · SRS v1.0(기술 제약) · 설계 다이어그램
+├── plan-docs/         실행 계획 — 태스크 리스트 · 개발 실행 계획 · 압축 수행 일정
+├── analysis-docs/     분석 — 태스크 추출 방법론 평가 · 축약 가능성 검토
+├── ops-docs/          운영 — GitHub Project 뷰 설정 가이드
+└── tasks/             태스크별 이슈 명세 59건 (파일명 = 태스크 ID)
+```
+
+`docs/tasks/` 만 이름을 그대로 뒀습니다. 파일명이 이미 태스크 ID(`DAT-001.md`)이고, 등록된 GitHub Issue 59건이 이 경로로 매핑돼 있습니다.
 
 ---
 
@@ -122,7 +138,7 @@ PRD 기준선 대부분이 **가설(H)** 상태입니다. 모의 인터뷰 11건
 
 ## 6. PRD Markdown 변환
 
-원본 PRD가 슬라이드 덱 HTML이라 그대로는 대조 작업이 어렵습니다. `tools/html_to_md.py` 로 **내용 손실 없이** `ai-place-prd-v0.1.md` 를 생성해 두었습니다.
+원본 PRD가 슬라이드 덱 HTML이라 그대로는 대조 작업이 어렵습니다. `tools/html_to_md.py` 로 **내용 손실 없이** `docs/source-docs/[PRD]AI-Place-Mate-PRD-v0_1.md` 를 생성해 두었습니다.
 
 ### 변환 규칙
 
@@ -160,7 +176,7 @@ MD에만 있는 토큰(추가)   179개
 
 ## 7. SRS 변환 결과
 
-`docs/[SRS 문서] AI-Place-Mate (한글).md` — 782줄 · 표 36개 · REQ-FUNC 10건 · REQ-NF 15건.
+`docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v0_1.md` — 782줄 · 표 36개 · REQ-FUNC 10건 · REQ-NF 15건.
 
 ### 1–7장 — 예시 양식 준수
 
@@ -186,7 +202,7 @@ PRD가 이미 확정했으나 예시 양식에 대응 절이 없는 내용만, �
 
 ## 8. 설계 문서 (SDD)
 
-`docs/[설계 문서] AI-Place-Mate (한글).md` — 1,443줄 · **다이어그램 32개**. SRS의 요구사항을 어떻게 구현할지를 그림으로 정리했고, 새 요구사항은 만들지 않았습니다.
+`docs/tech-design-docs/[Diagrams]AI-Place-Mate-Diagrams.md` — 1,443줄 · **다이어그램 32개**. SRS의 요구사항을 어떻게 구현할지를 그림으로 정리했고, 새 요구사항은 만들지 않았습니다.
 
 | 종류 | 개수 | 내용 |
 | --- | --- | --- |
@@ -222,7 +238,7 @@ PRD가 이미 확정했으나 예시 양식에 대응 절이 없는 내용만, �
 
 ## 9. 기술 제약 반영판 SRS
 
-`docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md` — 1,076줄 · 표 37개 · 다이어그램 6개.
+`docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v1_0.md` — 1,076줄 · 표 37개 · 다이어그램 6개.
 
 기술 중립판(SRS-AIPLACE-MVP-001)이 **무엇을 만들 것인가**를 정의한다면, 이 문서는 **주어진 스택으로 어떻게 성립시킬 것인가**를 정의합니다. 원본을 대체하지 않는 **병렬 문서**입니다.
 
@@ -258,7 +274,7 @@ PRD가 이미 확정했으나 예시 양식에 대응 절이 없는 내용만, �
 
 ## 10. 태스크 리스트
 
-`docs/[태스크 리스트] AI-Place-Mate.md` — 369줄 · **태스크 97건** · Epic 13개.
+`docs/plan-docs/[TaskList]AI-Place-Mate-Task-List.md` — 369줄 · **태스크 97건** · Epic 13개.
 
 기술제약 반영판 SRS를 실행 가능한 Feature 단위로 분해했습니다. 반영판을 기준으로 삼은 이유는, 그 문서만이 구현 단위(Server Action · Route Handler · RSC · Cron)를 확정하고 있어 태스크로 쪼갤 수 있기 때문입니다.
 
@@ -299,7 +315,7 @@ SRS에 없는 기능은 넣지 않았고, **의도적으로 제외한 항목은 
 | 유형(Type) 열 | Contract/Data/Read/Write/Test/Infra/NFR/Design | 118건 전건 분류 |
 | Epic 신설 | `CTR` 계약 6 · `MCK` Mock 5 · `TST` 테스트 11 | 97 → **118건** |
 
-**이후 축약 적용** — 118 → **56건**. 저복잡도 항목을 통합하고 `UI` 유형을 신설해 **UX 구현과 기능 구현을 분리 추적**합니다. 상세는 `docs/[분석] 태스크 축약 가능성 검토.md`.
+**이후 축약 적용** — 118 → **56건**. 저복잡도 항목을 통합하고 `UI` 유형을 신설해 **UX 구현과 기능 구현을 분리 추적**합니다. 상세는 `docs/analysis-docs/[Analysis]Task-Consolidation-Review.md`.
 
 | 계층 | 건수 |
 | --- | --- |
@@ -314,7 +330,7 @@ SRS에 없는 기능은 넣지 않았고, **의도적으로 제외한 항목은 
 ```
 tools/tasks_data.py     ← 단일 원천 (118 레코드)
         ↓ gen_task_list.py (검증 + 렌더)
-docs/[태스크 리스트] AI-Place-Mate.md   ← 생성물 · 직접 편집 금지
+docs/plan-docs/[TaskList]AI-Place-Mate-Task-List.md   ← 생성물 · 직접 편집 금지
 ```
 
 `후행 태스크(Blocks)`를 수기로 쓰면 반드시 어긋나므로 역산으로만 채웁니다. 생성기가 **중복 ID · 미정의 선행 · 순환 의존성 · 스프린트 역전**을 검사하고, 하나라도 걸리면 문서를 쓰지 않습니다.
@@ -330,7 +346,7 @@ docs/[태스크 리스트] AI-Place-Mate.md   ← 생성물 · 직접 편집 금
 
 ## 12. 개발 실행 계획
 
-`docs/[총괄] 개발 실행 계획.md` — 1,013줄 · 다이어그램 9개. 태스크 59건을 **누가 · 어떤 순서로 · 언제** 만드는지 정의합니다.
+`docs/plan-docs/[Plan]AI-Place-Mate-Execution-Plan.md` — 1,013줄 · 다이어그램 9개. 태스크 59건을 **누가 · 어떤 순서로 · 언제** 만드는지 정의합니다.
 
 | 항목 | 값 |
 | --- | --- |
@@ -368,7 +384,7 @@ docs/[태스크 리스트] AI-Place-Mate.md   ← 생성물 · 직접 편집 금
 
 ## 13. 압축 수행 일정 (대안)
 
-`docs/[총괄] 압축 수행 일정.md` — 297줄. 기본 계획을 **대체하지 않는 대안**으로, 병렬 가능한 태스크를 최대한 동시 수행해 임계 경로 하한까지 압축했습니다.
+`docs/plan-docs/[Plan]AI-Place-Mate-Fast-Track-Schedule.md` — 297줄. 기본 계획을 **대체하지 않는 대안**으로, 병렬 가능한 태스크를 최대한 동시 수행해 임계 경로 하한까지 압축했습니다.
 
 | 안 | 인원 | 완료 | 평균 가동률 |
 | --- | --- | --- | --- |
@@ -424,7 +440,7 @@ docs/[태스크 리스트] AI-Place-Mate.md   ← 생성물 · 직접 편집 금
 | 내장 재사용 | `Start date` · `Target date` · `Estimate`(일수) · `Size`(복잡도) · `Priority`(임계경로/후행수) · `Status` |
 | 신설 | `Week` · `Track` · `Lane` · `Epic` · `Task type` · `Phase` · `Sprint` · `Critical path` · `Depends on` · `Blocks` · `Task ID` · `Complexity note` |
 
-**뷰 설정은 `docs/[운영] GitHub Project 뷰 설정 가이드.md`를 따릅니다** — Projects v2는 뷰 생성 API가 없어 웹에서 만들어야 합니다.
+**뷰 설정은 `docs/ops-docs/[Ops]GitHub-Project-View-Setup.md`를 따릅니다** — Projects v2는 뷰 생성 API가 없어 웹에서 만들어야 합니다.
 
 ---
 

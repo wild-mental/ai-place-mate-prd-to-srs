@@ -251,9 +251,9 @@
 | 대상 | 조치 |
 | --- | --- |
 | `tools/tasks_data.py` | 118 → 53 레코드로 재작성 (단일 원천) |
-| `docs/[태스크 리스트] AI-Place-Mate.md` | `gen_task_list.py` 로 재생성 (자동) |
+| `docs/plan-docs/[TaskList]AI-Place-Mate-Task-List.md` | `gen_task_list.py` 로 재생성 (자동) |
 | 부록 A 임계 경로 · B 스프린트 배치 · C 커버리지 | 생성기가 자동 갱신 |
-| `docs/[분석] 태스크 추출 방법론 적합성 평가.md` | Phase별 건수(P1 21 · P2 18 · P3 30 · P4 11 · P5 38)를 재산정 |
+| `docs/analysis-docs/[Analysis]Task-Extraction-Methodology.md` | Phase별 건수(P1 21 · P2 18 · P3 30 · P4 11 · P5 38)를 재산정 |
 
 ### 6.3 요구사항 커버리지
 
@@ -280,4 +280,4 @@
 
 **ANL-AIPLACE-TASK-002 · 2026-08-25 · Owner 5팀**
 
-관련 문서: `[태스크 리스트] AI-Place-Mate.md` · `[분석] 태스크 추출 방법론 적합성 평가.md` · `tools/tasks_data.py`
+관련 문서: `[TaskList]AI-Place-Mate-Task-List.md` · `[분석] 태스크 추출 방법론 적합성 평가.md` · `tools/tasks_data.py`

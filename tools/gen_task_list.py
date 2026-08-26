@@ -15,7 +15,7 @@ from collections import defaultdict
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import tasks_data as D  # noqa: E402
 
-OUT = "docs/[태스크 리스트] AI-Place-Mate.md"
+OUT = "docs/plan-docs/[TaskList]AI-Place-Mate-Task-List.md"
 BY = {t[0]: t for t in D.TASKS}
 IDS = list(BY)
 
@@ -32,7 +32,7 @@ def blocks_map():
 
 BLOCKS = blocks_map()
 
-SRS_TEC = "docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md"
+SRS_TEC = "docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v1_0.md"
 
 # 담당 태스크가 없는 요구사항의 사유 — 근거 없이 비워 두지 않는다
 UNCOVERED_REASON = {
@@ -230,7 +230,7 @@ def build():
     A("")
     A("**날짜:** 2026-08-25")
     A("")
-    A("**근거 문서:** SRS-AIPLACE-TEC-001 v1.0 (`[SRS 문서] AI-Place-Mate (기술제약 반영판).md`)")
+    A("**근거 문서:** SRS-AIPLACE-TEC-001 v1.0 (`[SRS]AI-Place-Mate-SRS-v1_0.md`)")
     A("")
     A("**참조 문서:** SRS-AIPLACE-MVP-001 (기술 중립판) · SDD-AIPLACE-MVP-001 (설계 문서) · "
       "ANL-AIPLACE-TASK-001 (방법론 적합성 평가) · ANL-AIPLACE-TASK-002 (축약 검토 — 본 개정의 근거)")

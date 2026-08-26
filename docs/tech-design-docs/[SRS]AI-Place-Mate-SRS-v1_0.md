@@ -10,7 +10,7 @@
 
 **표준:** ISO/IEC/IEEE 29148:2018
 
-**병렬 문서:** SRS-AIPLACE-MVP-001 v1.0 (`[SRS 문서] AI-Place-Mate (한글).md`) — 기술 중립판
+**병렬 문서:** SRS-AIPLACE-MVP-001 v1.0 (`[SRS]AI-Place-Mate-SRS-v0_1.md`) — 기술 중립판
 
 ---
 
@@ -1072,4 +1072,4 @@ flowchart LR
 
 **SRS-AIPLACE-TEC-001 · v1.0 · 2026-08-25 · Owner 5팀**
 
-병렬 문서: `[SRS 문서] AI-Place-Mate (한글).md` (기술 중립판) · `[설계 문서] AI-Place-Mate (한글).md` (SDD) · `ai-place-prd-v1_0.md` (PRD)
+병렬 문서: `[SRS]AI-Place-Mate-SRS-v0_1.md` (기술 중립판) · `[Diagrams]AI-Place-Mate-Diagrams.md` (SDD) · `docs/tech-design-docs/[PRD]AI-Place-Mate-PRD-v1_0.md` (PRD)

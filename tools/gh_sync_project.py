@@ -135,32 +135,64 @@ def set_values():
             "Blocks": ("text", " ".join(v["blocks"]) or "—"),
         }
 
+    # 항목 하나의 필드 18개를 alias로 묶어 단일 뮤테이션으로 보낸다.
+    # 필드마다 따로 호출하면 59×18 = 약 940회가 되어 GraphQL 한도(5000점)를
+    # 태운다. 묶으면 59회로 떨어진다.
+    def mutation(iid, fields):
+        parts = []
+        for n, (fid, lit) in enumerate(fields):
+            parts.append(f'a{n}:updateProjectV2ItemFieldValue(input:{{'
+                         f'projectId:$p,itemId:$i,fieldId:{json.dumps(fid)},'
+                         f'value:{{{lit}}}}}){{clientMutationId}}')
+        return "mutation($p:ID!,$i:ID!){" + " ".join(parts) + "}"
+
     ok = err = 0
+    failed = []
     for tid, iid in sorted(items.items()):
+        fields = []
         for fname, (kind, value) in val(tid).items():
             f = F.get(fname)
             if not f:
                 continue
-            cmd = ["gh", "project", "item-edit", "--id", iid, "--project-id", pid,
-                   "--field-id", f["id"]]
             if kind == "opt":
                 o = next((x for x in f.get("options", []) if x["name"] == str(value)), None)
                 if not o:
                     continue
-                cmd += ["--single-select-option-id", o["id"]]
+                lit = f'singleSelectOptionId:{json.dumps(o["id"])}'
             elif kind == "date":
-                cmd += ["--date", str(value)]
+                lit = f'date:{json.dumps(str(value))}'
             elif kind == "number":
-                cmd += ["--number", str(value)]
+                lit = f'number:{float(value)}'
             else:
-                cmd += ["--text", str(value)]
-            r = subprocess.run(cmd, capture_output=True, text=True)
-            if r.returncode:
-                err += 1
-            else:
-                ok += 1
-        print(f"  ✅ {tid}")
+                lit = f'text:{json.dumps(str(value))}'
+            fields.append((f["id"], lit))
+
+        q = mutation(iid, fields)
+        for attempt in range(4):
+            r = subprocess.run(["gh", "api", "graphql", "-f", f"query={q}",
+                                "-F", f"p={pid}", "-F", f"i={iid}"],
+                               capture_output=True, text=True)
+            if r.returncode == 0:
+                break
+            # 2차 한도(secondary rate limit)는 잠깐 쉬면 풀린다.
+            if "rate limit" in r.stderr.lower() and attempt < 3:
+                wait = 60 * (attempt + 1)
+                print(f"  … 한도 대기 {wait}s ({tid})", flush=True)
+                time.sleep(wait)
+                continue
+            break
+        if r.returncode == 0:
+            ok += 1
+            print(f"  ✅ {tid} ({len(fields)}개 필드)", flush=True)
+        else:
+            err += 1
+            failed.append(tid)
+            print(f"  ❌ {tid} :: {r.stderr.strip()[:160]}", flush=True)
+        time.sleep(0.5)
+
     print(f"필드 값 주입: 성공 {ok} · 실패 {err}")
+    if failed:
+        print("실패 태스크: " + " ".join(failed))
 
 
 if __name__ == "__main__":

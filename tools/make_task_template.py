@@ -38,13 +38,13 @@ assignees: ''
 
 ## 🔗 References (Spec & Context)
 > 💡 AI Agent & Dev Note: 작업 시작 전 아래 문서를 반드시 먼저 Read/Evaluate 할 것.
-- 태스크 리스트: `/docs/[태스크 리스트] AI-Place-Mate.md#<TASK-ID>`  <!-- 예: #DAT-001 -->
-- SRS 문서(기술제약 반영판): `/docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md#<REQ-ID>`  <!-- 예: #REQ-FUNC-001 -->
-- SRS 문서(기술 중립판): `/docs/[SRS 문서] AI-Place-Mate (한글).md#<REQ-ID>`
-- 설계 문서(SDD): `/docs/[설계 문서] AI-Place-Mate (한글).md#<diagram-anchor>`
+- 태스크 리스트: `/docs/plan-docs/[TaskList]AI-Place-Mate-Task-List.md#<TASK-ID>`  <!-- 예: #DAT-001 -->
+- SRS 문서(기술제약 반영판): `/docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v1_0.md#<REQ-ID>`  <!-- 예: #REQ-FUNC-001 -->
+- SRS 문서(기술 중립판): `/docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v0_1.md#<REQ-ID>`
+- 설계 문서(SDD): `/docs/tech-design-docs/[Diagrams]AI-Place-Mate-Diagrams.md#<diagram-anchor>`
 - 시퀀스 다이어그램: `<SD-01 ~ SD-10 중 해당 항목 · 없으면 "해당 없음">`
-- 데이터 모델 (ERD): `/docs/[설계 문서] AI-Place-Mate (한글).md#31-erd--개체와-관계`
-- 서버 진입점 명세: `/docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md#61-서버-진입점-목록`
+- 데이터 모델 (ERD): `/docs/tech-design-docs/[Diagrams]AI-Place-Mate-Diagrams.md#31-erd--개체와-관계`
+- 서버 진입점 명세: `/docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v1_0.md#61-서버-진입점-목록`
 
 ## ✅ Task Breakdown (실행 계획)
 <!-- 각 항목은 하루 안에 끝나는 크기로. 완료 여부를 보는 사람이 판단할 수 있게 -->

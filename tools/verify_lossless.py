@@ -3,7 +3,7 @@
 import re, html, difflib
 from html.parser import HTMLParser
 
-raw=open('ai-place-prd-v0.1.html',encoding='utf-8').read()
+raw=open('docs/source-docs/[PRD]AI-Place-Mate-PRD-v0_1.html',encoding='utf-8').read()
 raw=re.sub(r'<!--.*?-->','',raw,flags=re.S)
 # 슬라이드 섹션만 추출
 sections=re.findall(r'<section class="slide">(.*?)</section>', raw, flags=re.S)
@@ -11,7 +11,7 @@ h=''.join(sections)
 h=re.sub(r'<(script|style)[^>]*>.*?</\1>','',h,flags=re.S)
 h=html.unescape(re.sub(r'<[^>]+>',' ',h))
 
-m=open('ai-place-prd-v0.1.md',encoding='utf-8').read()
+m=open('docs/source-docs/[PRD]AI-Place-Mate-PRD-v0_1.md',encoding='utf-8').read()
 # 변환기가 덧붙인 머리말·슬라이드 주석만 제거
 m=re.sub(r'^# .*?\n(> .*\n)+','',m,count=1)
 m=re.sub(r'<!-- 슬라이드 \d+ / \d+ -->','',m)

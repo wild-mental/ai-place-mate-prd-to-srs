@@ -8,7 +8,7 @@
 
 **날짜:** 2026-08-24
 
-**상위 문서:** SRS-AIPLACE-MVP-001 v1.0 (`[SRS 문서] AI-Place-Mate (한글).md`)
+**상위 문서:** SRS-AIPLACE-MVP-001 v1.0 (`[SRS]AI-Place-Mate-SRS-v0_1.md`)
 
 본 문서는 SRS가 정한 요구사항을 **어떻게 구현할 것인지**를 그림으로 설명한다. 새로운 요구사항을 만들지 않으며, 모든 설계 요소는 SRS의 요구사항 ID로 되짚을 수 있다.
 
@@ -1439,4 +1439,4 @@ SRS의 모든 기능 요구사항이 최소 한 개의 설계 산출물로 이�
 
 **SDD-AIPLACE-MVP-001 · v1.0 · 2026-08-24 · Owner 5팀**
 
-상위 문서: `[SRS 문서] AI-Place-Mate (한글).md` · `ai-place-prd-v1_0.md`
+상위 문서: `[SRS]AI-Place-Mate-SRS-v0_1.md` · `docs/tech-design-docs/[PRD]AI-Place-Mate-PRD-v1_0.md`

@@ -10,15 +10,15 @@
 import re, sys, os, glob
 
 DOCS = [
-    "ai-place-prd-v1_0.md",
-    "docs/[SRS 문서] AI-Place-Mate (한글).md",
-    "docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md",
-    "docs/[설계 문서] AI-Place-Mate (한글).md",
-    "docs/[태스크 리스트] AI-Place-Mate.md",
-    "docs/[분석] 태스크 추출 방법론 적합성 평가.md",
-    "docs/[분석] 태스크 축약 가능성 검토.md",
-    "docs/[총괄] 개발 실행 계획.md",
-    "docs/[총괄] 압축 수행 일정.md",
+    "docs/tech-design-docs/[PRD]AI-Place-Mate-PRD-v1_0.md",
+    "docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v0_1.md",
+    "docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v1_0.md",
+    "docs/tech-design-docs/[Diagrams]AI-Place-Mate-Diagrams.md",
+    "docs/plan-docs/[TaskList]AI-Place-Mate-Task-List.md",
+    "docs/analysis-docs/[Analysis]Task-Extraction-Methodology.md",
+    "docs/analysis-docs/[Analysis]Task-Consolidation-Review.md",
+    "docs/plan-docs/[Plan]AI-Place-Mate-Execution-Plan.md",
+    "docs/plan-docs/[Plan]AI-Place-Mate-Fast-Track-Schedule.md",
     "README.md",
 ]
 
@@ -95,15 +95,15 @@ def main():
     # 앵커 무결성 — 태스크 리스트가 참조하는 앵커가 SRS에 실재하는가
     import re as _re
     anchors = set()
-    for _p in ["docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md",
-               "docs/[SRS 문서] AI-Place-Mate (한글).md",
-               "docs/[태스크 리스트] AI-Place-Mate.md"]:
+    for _p in ["docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v1_0.md",
+               "docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v0_1.md",
+               "docs/plan-docs/[TaskList]AI-Place-Mate-Task-List.md"]:
         if os.path.exists(_p):
             anchors |= set(_re.findall(r'<a id="([^"]+)"', open(_p, encoding="utf-8").read()))
     print(f'\n인라인 앵커 {len(anchors)}개 (요구사항 + 태스크)')
 
-    srs = req_ids.get("docs/[SRS 문서] AI-Place-Mate (한글).md", set())
-    sdd = req_ids.get("docs/[설계 문서] AI-Place-Mate (한글).md", set())
+    srs = req_ids.get("docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v0_1.md", set())
+    sdd = req_ids.get("docs/tech-design-docs/[Diagrams]AI-Place-Mate-Diagrams.md", set())
     orphan = sorted(sdd - srs)
     print(f'\nSRS 요구사항 ID {len(srs)}건 · SDD 참조 {len(sdd)}건')
     if orphan:

@@ -11,7 +11,7 @@ from collections import defaultdict, Counter
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import tasks_data as D
 
-OUT = "docs/[총괄] 압축 수행 일정.md"
+OUT = "docs/plan-docs/[Plan]AI-Place-Mate-Fast-Track-Schedule.md"
 BY = {t[0]: t for t in D.TASKS}
 IDS = list(BY)
 DUR = {"H": 5, "M": 3, "L": 1}
