@@ -391,6 +391,32 @@ docs/[태스크 리스트] AI-Place-Mate.md   ← 생성물 · 직접 편집 금
 
 ---
 
+## 14. GitHub Project 연동
+
+압축 수행 일정(PLAN-FAST-001)을 GitHub에 옮겨 웹에서 일정을 관리합니다.
+
+| 항목 | 결과 |
+| --- | --- |
+| 이슈 | **59/59건** (`#1` ~ `#59` · 압축 일정 착수 순서) |
+| 라벨 | 38개 — `epic:*` 16 · `part:*` 4 · `type:*` 9 · `complexity:*` 3 · `phase:*` 4 · `critical-path` · `blocked-external` |
+| 마일스톤 | 10개 (S-1~S8) · 압축 일정 기준 마감일 |
+| 의존성 | `Depends on` / `Blocks` 를 실제 이슈 번호로 상호 링크 |
+
+각 이슈 본문 상단에 트랙·레인·스프린트·Phase·**시작~종료일**·선행·후행 요약표와 원본 문서 링크가 들어 있습니다.
+
+### 동기화 도구
+
+| 도구 | 용도 |
+| --- | --- |
+| `tools/export_schedule.py` | 압축 일정을 GitHub 연동용 JSON으로 내보내기 |
+| `tools/gh_sync_issues.py` | 이슈 생성 (`--create`) · 의존성 번호 연결 (`--link`) |
+| `tools/gh_sync_project.py` | 프로젝트 필드 생성 · 아이템 추가 · 값 주입 (`--all`) |
+| `tools/issue_map.json` | 태스크 ID ↔ 이슈 번호 매핑 |
+
+**프로젝트 조작에는 `project` 스코프가 필요합니다** — `gh auth refresh -s project`
+
+---
+
 ## 부기 · 표준 원문 취급
 
 `29148-2018-ISOIECIEEE.pdf` 는 유료 배포되는 저작권 보호 문서라 공개 저장소에 올리지 않습니다. `.gitignore` 로 제외되어 있으며 로컬 작업 디렉터리에는 그대로 남아 있어 참조에 지장이 없습니다.
