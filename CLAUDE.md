@@ -53,6 +53,7 @@ GitHub Project #25가 이슈 단위로 돌고 있다.
 | `302-data-access-rules` | 스키마 변경 · 쿼리 · RLS · 트랜잭션 |
 | `303-ai-integration-rules` | AI 호출 · 프롬프트 · 2단 파싱 |
 | `400-task-execution-workflow` | 태스크 시작·진행·완료 |
+| `401-prototype-visual-rules` | **로컬 시각 프로토타입** 화면·상태·카드·카피 — 지어내기 차단 |
 | `100-error-fixing-process` | 에러·빌드 실패 진단 |
 | `101-build-and-env-setup` | 환경 구성 · 환경 변수 · 배포 |
 | `200-git-commit-push-pr` | 커밋 · 브랜치 · PR |
