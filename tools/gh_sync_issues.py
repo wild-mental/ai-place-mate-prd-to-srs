@@ -6,6 +6,7 @@
     python3 tools/gh_sync_issues.py --dry TASK-ID   # 본문 미리보기
     python3 tools/gh_sync_issues.py --create        # 전량 생성
     python3 tools/gh_sync_issues.py --link          # Depends/Blocks 를 실제 #번호로 치환
+    python3 tools/gh_sync_issues.py --refresh-paths # 본문의 옛 문서 경로만 교체
 """
 import sys, os, re, json, subprocess, time
 
@@ -102,6 +103,53 @@ def link():
         time.sleep(0.4)
 
 
+# 문서를 재배치하기 전에 등록된 이슈 본문에 박힌 옛 경로.
+# 본문을 다시 생성하면 --link 로 치환해 둔 이슈 번호(`#58 (AGR-005)`)가
+# 날아가므로, 경로 문자열만 골라 바꾼다.
+STALE = [
+    ("docs/%5B%ED%83%9C%EC%8A%A4%ED%81%AC%20%EB%A6%AC%EC%8A%A4%ED%8A%B8%5D%20AI-Place-Mate.md",
+     "docs/plan-docs/%5BTaskList%5DAI-Place-Mate-Task-List.md"),
+    ("docs/%5B%EC%B4%9D%EA%B4%84%5D%20%EC%95%95%EC%B6%95%20%EC%88%98%ED%96%89%20%EC%9D%BC%EC%A0%95.md",
+     "docs/plan-docs/%5BPlan%5DAI-Place-Mate-Fast-Track-Schedule.md"),
+    ("/docs/[SRS 문서] AI-Place-Mate (기술제약 반영판).md",
+     "/docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v1_0.md"),
+    ("/docs/[SRS 문서] AI-Place-Mate (한글).md",
+     "/docs/tech-design-docs/[SRS]AI-Place-Mate-SRS-v0_1.md"),
+    ("/docs/[설계 문서] AI-Place-Mate (한글).md",
+     "/docs/tech-design-docs/[Diagrams]AI-Place-Mate-Diagrams.md"),
+    ("/docs/[태스크 리스트] AI-Place-Mate.md",
+     "/docs/plan-docs/[TaskList]AI-Place-Mate-Task-List.md"),
+]
+
+
+def refresh_paths():
+    """등록된 이슈 본문의 옛 문서 경로만 새 경로로 바꾼다."""
+    M = json.load(open("tools/issue_map.json"))
+    changed = skipped = failed = 0
+    for tid, num in sorted(M.items(), key=lambda kv: kv[1]):
+        r = subprocess.run(["gh", "issue", "view", str(num), "--repo", REPO,
+                            "--json", "body", "--jq", ".body"],
+                           capture_output=True, text=True)
+        if r.returncode:
+            print(f"  ❌ #{num} {tid} 조회 실패", flush=True); failed += 1; continue
+        b = r.stdout
+        new = b
+        for old, rep in STALE:
+            new = new.replace(old, rep)
+        if new == b:
+            skipped += 1; continue
+        f = f"/tmp/refresh_{tid}.md"
+        open(f, "w", encoding="utf-8").write(new)
+        w = subprocess.run(["gh", "issue", "edit", str(num), "--repo", REPO,
+                            "--body-file", f], capture_output=True, text=True)
+        if w.returncode:
+            print(f"  ❌ #{num} {tid} :: {w.stderr.strip()[:120]}", flush=True); failed += 1
+        else:
+            print(f"  ✅ #{num} {tid}", flush=True); changed += 1
+        time.sleep(0.4)
+    print(f"본문 경로 갱신: 변경 {changed} · 변경없음 {skipped} · 실패 {failed}")
+
+
 if __name__ == "__main__":
     if "--dry" in sys.argv:
         tid = sys.argv[sys.argv.index("--dry") + 1]
@@ -111,3 +159,5 @@ if __name__ == "__main__":
         create()
     elif "--link" in sys.argv:
         link()
+    elif "--refresh-paths" in sys.argv:
+        refresh_paths()
