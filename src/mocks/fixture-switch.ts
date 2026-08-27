@@ -20,6 +20,7 @@ export const FIXTURE_KEYS = [
   "parse-fail",
   "error",
   "notices",
+  "widened",
 ] as const;
 
 export type FixtureKey = (typeof FIXTURE_KEYS)[number];
@@ -40,6 +41,7 @@ export const FIXTURE_LABEL: Record<FixtureKey, string> = {
   "parse-fail": "S7 폴백",
   error: "S8 오류",
   notices: "고지 배너 3종",
+  widened: "반경 확대 결과",
 };
 
 export function resolveFixture(key: FixtureKey): ResultView {
@@ -65,6 +67,16 @@ export function resolveFixture(key: FixtureKey): ResultView {
         query: "감바스 먹을 곳",
         candidates: [...TOP3.OK],
         notices: [NOTICES.N1, NOTICES.N2, NOTICES.N3],
+      };
+    case "widened":
+      // S6 의 '반경 더 넓히기' 착지 화면.
+      // 질의를 그대로 유지하고 N2 만 얹는다 — notices 로 보내면 질의가 '감바스 먹을 곳'으로
+      // 바뀌고 요청하지 않은 N1·N3 까지 딸려와 남의 검색에 착지한 것처럼 읽힌다.
+      return {
+        kind: "list",
+        query: QUERY,
+        candidates: [...TOP3.OK],
+        notices: [NOTICES.N2],
       };
   }
 }

@@ -2,7 +2,7 @@
 
 **문서 ID:** OPS-AIPLACE-GOAL-001
 
-**개정 버전:** 1.1
+**개정 버전:** 1.2
 
 **날짜:** 2026-08-27
 
@@ -42,7 +42,7 @@
   5) D5 `RNK-003` — 두 페이지 배선 · 스켈레톤 · 390px 정리 · 스크린샷
 - 각 D 단계가 끝나면 커밋한다. 커밋 메시지는 한국어 Conventional Commits, 푸터에 `Refs #<이슈번호>`. **`Closes` 를 쓰지 않는다** — 부분 착수라 이슈가 닫히면 남은 범위가 사라진다.
 - 화면은 `src/mocks/types.ts` 만 본다. 픽스처 리터럴(`top3.ts`·`parse.ts`)을 컴포넌트가 직접 import하지 않는다.
-- D5 이후 `webapp-testing` 스킬(Playwright)로 **390px 폭** 스크린샷 9장을 `reports/proto/` 에 저장한다: `s1-input.png` `s2-loading.png` `s3-ok.png` `s4-stale.png` `s5-two.png` `s6-zero.png` `s7-parse-fail.png` `s8-error.png` `n-notices.png` `s9-selected.png`.
+- D5 이후 `webapp-testing` 스킬(Playwright)로 **390px 폭** 스크린샷 9장을 `reports/proto/` 에 저장한다: `s1-input.png` `s2-loading.png` `s3-ok.png` `s4-stale.png` `s5-two.png` `s6-zero.png` `s7-parse-fail.png` `s8-error.png` `n-notices.png` `n-widened.png` `s9-selected.png`.
 - 미해소 결정 처리 — `docs/grill/GRILL_LEDGER.md` 의 T3~T8은 아직 UNRESOLVED다. 구현 중 해당 결정이 필요해지면 **사용자에게 묻지 말고** 명세와 PRD(`docs/tech-design-docs/[PRD]AI-Place-Mate-PRD-v1_0.md` §2 페르소나 · §3 US-1~US-3)를 근거로 결정한 뒤 원장에 기록한다:
   - CORE(화면 구조·카피 틀·토큰 값·픽스처 실체) / MINOR(네이밍·간격·파일명)로 분류
   - 원장 상단에 grep 가능한 카운터를 각각 별도 줄로 유지 — `CORE: N` · `MINOR: M`
@@ -58,10 +58,10 @@
 - 종료 방법:
   1) `docs/grill/GRILL_LEDGER.md` 마지막 줄에 `STOP REASON: <원인 코드>` 한 줄을 덧붙인다.
   2) `npm run build` 를 실행해 exit 0 출력을 대화에 남긴다. **[기계 게이트 1]**
-  3) `npm run dev` 를 백그라운드로 띄운 뒤 아래를 실행해 **9줄 전부 `200`** 인 출력을 대화에 남긴다. **[기계 게이트 2]**
-     `curl -s -o /dev/null -w "%{http_code} /\n" http://localhost:3000/ ; for f in loading ok stale two zero parse-fail error notices; do curl -s -o /dev/null -w "%{http_code} /results?fixture=$f\n" "http://localhost:3000/results?fixture=$f"; done`
+  3) `npm run dev` 를 백그라운드로 띄운 뒤 아래를 실행해 **11줄 전부 `200`** 인 출력을 대화에 남긴다. **[기계 게이트 2]**
+     `curl -s -o /dev/null -w "%{http_code} /\n" http://localhost:3000/ ; for f in loading ok stale two zero parse-fail error notices widened; do curl -s -o /dev/null -w "%{http_code} /results?fixture=$f\n" "http://localhost:3000/results?fixture=$f"; done`
   4) `grep -rnE '#[0-9a-fA-F]{3,8}' app/ src/ --include='*.tsx' | wc -l` 를 실행해 **`0`** 출력을 대화에 남긴다 (하드코딩 색상 0건 · INF-002 AC1). **[기계 게이트 3]**
-  5) `ls app/layout.tsx 'app/(search)/page.tsx' 'app/(search)/results/page.tsx' src/mocks/types.ts src/mocks/fixture-switch.ts && ls reports/proto/ | wc -l` 를 실행해 exit 0 과 **`10`** 출력을 대화에 남긴다 (SRS §14.1 구조 + 스크린샷 10장). **[기계 게이트 4]**
+  5) `ls app/layout.tsx 'app/(search)/page.tsx' 'app/(search)/results/page.tsx' src/mocks/types.ts src/mocks/fixture-switch.ts && ls reports/proto/ | wc -l` 를 실행해 exit 0 과 **`11`** 출력을 대화에 남긴다 (SRS §14.1 구조 + 스크린샷 11장). **[기계 게이트 4]**
   6) `cat docs/grill/GRILL_LEDGER.md | head -20` 를 실행해 `CORE: N` · `MINOR: M` 카운터 줄과 `STOP REASON:` 줄이 보이는 출력을 대화에 남긴다.
   7) 마지막 aztks-agent 스코어카드 전문(5축 각각의 GO/NO-GO와 사유)을 대화에 그대로 남긴다.
   8) `git log --oneline origin/main..HEAD` 와 `git status --porcelain` 를 실행해 커밋 목록과 변경 파일이 §1 작업 대상 안에만 있음을 대화에 남긴다.
@@ -79,7 +79,7 @@
 - 호출 시점: **D5까지 한 바퀴 끝나고 기계 게이트 4종이 모두 통과한 뒤에만** 호출한다. 구현 중간에는 호출하지 않는다.
 - 호출 방식: `subagent_type: "aztks-agent"` · 프롬프트 첫 줄에 `MODE: EVALUATE` · read-only.
 - 평가자에게 넘길 입력 (경로를 프롬프트에 명시):
-  - 스크린샷 10장 — `reports/proto/*.png`
+  - 스크린샷 11장 — `reports/proto/*.png`
   - 화면 명세 — `docs/plan-docs/[Spec]Prototype-Visual-Plan.md`
   - 제품 근거 — `docs/tech-design-docs/[PRD]AI-Place-Mate-PRD-v1_0.md` §2 핵심 페르소나(C2·C3·C4·C1) · §2.2 v0.1이 만드는 흐름 · §3 US-1~US-3
   - 구현 코드 — `app/(search)/**`, `src/mocks/**`
@@ -117,6 +117,8 @@
 
 ---
 
-**OPS-AIPLACE-GOAL-001 · v1.1 · 2026-08-27 · 기계 게이트 4종 + AZTKS 5축 · turn cap 40**
+**OPS-AIPLACE-GOAL-001 · v1.2 · 2026-08-27 · 기계 게이트 4종 + AZTKS 5축 · turn cap 40**
 
+> v1.2 — 스크린샷 10장 → **11장**, 경로 10 → **11**. 라운드 3에서 S6 `반경 더 넓히기` 의 착지 화면이 질의를 바꾸던 문제가 잡혀 `widened` 착지 픽스처가 생겼고, 스위처에 노출되므로 증거 세트에도 들어갔다.
+>
 > v1.1 — 스크린샷 9장 → **10장**. 1라운드 평가에서 카드 슬롯 ⑥(선택 행위) 누락이 잡혀 명세 §2.1이 늘었고, 그 화면(`s9-selected.png`)이 캡처 대상에 더해졌다. 게이트는 산출물 수를 세는 장치이지 품질 기준이 아니므로, 명세가 늘면 함께 늘린다.

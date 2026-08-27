@@ -18,8 +18,9 @@ export const EMPTY: Extract<ResultView, { kind: "empty" }> = {
   body: "반경 3km까지 넓혀 찾았습니다.",
   actions: [
     { label: "조건 줄이기", href: "/" },
-    // 넓힌 결과임이 화면에 드러나야 한다 — N2 배너가 붙은 화면으로 보낸다
-    { label: "반경 더 넓히기", href: "/results?fixture=notices" },
+    // 넓힌 결과임이 화면에 드러나야 한다. 다만 질의를 유지하는 착지 화면으로 보낸다 —
+    // notices 로 보내면 질의가 바뀌고 요청하지 않은 배너까지 딸려온다
+    { label: "반경 더 넓히기", href: "/results?fixture=widened" },
   ],
 };
 
