@@ -9,12 +9,14 @@
 **재개:** `/grill-it` 재호출 → 이 원장을 읽고 **§재개 지점**부터 이어간다. RESOLVED 토픽은 다시 묻지 않는다.
 
 ```
-RESOLVED: 2 / TOTAL: 8
+RESOLVED: 3 / TOTAL: 8
+CORE: 1
+MINOR: 4
 - [x] T1 | CORE  | 확인할 화면 상태 목록 | status:RESOLVED | decision:상태 8종 유지 + 고지 배너 3종(N1·N2·N3)을 결과 화면 요소로 추가 · 동시 노출 프리셋 1개 | applied:[Spec]Prototype-Visual-Plan.md §1 신규 · prototype-suggestion-local.md §4·§8 · skill 401-prototype-visual-rules 신규 · CLAUDE.md 라우팅
 - [x] T2 | CORE  | 후보 카드 정보 구조 | status:RESOLVED | decision:카드 3장(슬롯 5개 순서 고정) + 하단 비교표(축 4개·값 5자 축약·가로스크롤 금지) · 확인 주체 4종 · 용어 '후기 코멘트' 고정 | applied:[Spec]…§2 · skill 401 §카드·비교표·용어
 - [ ] T3 | CORE  | 카피 규약 — 판정형 배제 하의 선정 이유 문장 틀과 빈·오류 문구 톤 | depends:T2      | status:UNRESOLVED
-- [ ] T4 | CORE  | 디자인 토큰 실제 값 — 브랜드 색 · 한글 폰트 · 라이트 전용 여부 | depends:-       | status:UNRESOLVED
-- [ ] T5 | MINOR | shadcn 컴포넌트 인벤토리 — 설치 목록과 자체 제작 금지 목록 | depends:T2,T4   | status:UNRESOLVED
+- [x] T4 | CORE  | 디자인 토큰 실제 값 | status:RESOLVED | decision:딥 틸 primary oklch(0.47 0.072 197) · 라이트 전용 · next/font 제거하고 시스템 한글 스택 | applied:app/globals.css UX-001 토큰 블록 · app/layout.tsx
+- [x] T5 | MINOR | shadcn 컴포넌트 인벤토리 | status:RESOLVED | decision:10종 설치 — button input card badge alert skeleton select separator table label | applied:components.json · src/components/ui/
 - [ ] T6 | CORE  | 픽스처 데이터의 실체 — 상권 · 메뉴 · 가격대 · 합성 규칙 | depends:T1,T2   | status:UNRESOLVED
 - [ ] T7 | MINOR | 확인 도구 — 상태 스위처 UI와 모바일 390px 뷰포트 표현 | depends:T1      | status:UNRESOLVED
 - [ ] T8 | MINOR | 산출물 문서의 명세 수준 — 에이전트가 지어내지 않고 실행할 상세도 | depends:T1~T7   | status:UNRESOLVED
@@ -126,3 +128,27 @@ S8 오류
 **용어 고정 (전면)** — `이용자 확인` → **`후기 코멘트`**. `리뷰·별점·평점` 계열은 v0.2 연기 기능과 혼동되므로 쓰지 않는다.
 
 **반영** — 명세 §2 · 스킬 `401` 3개 절 추가
+
+### T4 — 디자인 토큰 실제 값 (CORE · RESOLVED · 자율 결정)
+
+**브랜드 primary = `oklch(0.47 0.072 197)` 딥 틸.** 네이버 그린(`#03C75A`)을 쓰지 않는다 — 1차 유통 경로가 네이버 지도 탭이라(ADR-005) 같은 색이면 네이버 서비스로 오인된다. 채도를 낮춘 것은 '판정하지 않는다'(SRS §6.3-4)를 시각 언어에서도 지키기 위해서다.
+
+**상태 4종 토큰** — `--notice`(고지 배너 · 오류색 아님) · `--warn`(90일 경과 · 앰버, 후보를 부정적으로 보이게 하지 않는 톤) · `--empty` · `--evidence`(확인 일자·주체).
+
+**라이트 전용.** 다크 모드는 로컬 최소안 §3에서 잘라냈다. shadcn이 넣은 `.dark` 블록은 `class="dark"` 를 붙이지 않으므로 무효다.
+
+**next/font 제거 · 시스템 한글 스택.** `create-next-app` 이 넣은 Geist는 한글 글리프가 없고 next/font는 빌드 시 Google Fonts를 받는다 — 로컬 최소안 §0의 '외부 의존 0건'과 어긋난다. `-apple-system → Apple SD Gothic Neo → Pretendard → Malgun Gothic → Noto Sans KR` 스택으로 바꿨다. next/font 최적화는 `INF-002` 본 착수 범위다.
+
+### T5 — shadcn 컴포넌트 인벤토리 (MINOR · RESOLVED · 자율 결정)
+
+10종 — `button` `input` `card` `badge` `alert` `skeleton` `select` `separator` `table` `label`.
+상태 8종 + 배너 3종을 그리는 데 필요한 최소 집합이다. **이 목록 밖 컴포넌트를 자체 구현하지 않는다**(D-08 · REQ-TEC-007). 더 필요하면 만들지 말고 `shadcn add` 로 설치하고 이 목록에 더한다.
+
+### 부수 결정 (MINOR)
+
+| # | 결정 | 왜 |
+| --- | --- | --- |
+| M1 | tsconfig 별칭 `@/*` → `./src/*` | SRS §14.1은 `app/` 과 `src/` 가 형제다. shadcn 기본 별칭(`@/components/ui`·`@/lib/utils`)과도 맞는다 |
+| M2 | `src/lib/utils.ts` 허용 | shadcn의 `cn()` 헬퍼다. SRS §14.1의 `lib/{db,ai,cache,realtime,observability}.ts` 와 이름이 겹치지 않는다 |
+| M3 | 390px 프레임 = `max-w-[390px] mx-auto border-x` | 데스크톱에서도 모바일 폭 그대로 보이게 한다 (T7 일부 선결) |
+| M4 | 최상단 '픽스처 기반 · 화면 미확정' 표기 | R5 완화. 고지 배너와 혼동되지 않게 콘텐츠 밖에 둔다 |
