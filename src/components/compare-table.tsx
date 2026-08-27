@@ -18,7 +18,7 @@ import {
 import type { Candidate, CompareCell } from "@/mocks/types";
 
 const AXES: { key: keyof CompareCell; label: string }[] = [
-  { key: "price", label: "인당가" },
+  { key: "price", label: "인당가" }, // 값은 범위 **상한** 기준이다 — 카드의 범위 표기와 어긋나 보이지 않게 ~ 를 붙인다
   { key: "signature", label: "대표" },
   { key: "situation", label: "상황" },
   { key: "verified", label: "확인" },

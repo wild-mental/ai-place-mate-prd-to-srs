@@ -25,7 +25,13 @@ import {
   type FixtureKey,
 } from "@/mocks/fixture-switch";
 
-async function ResultBody({ fixture }: { fixture: FixtureKey }) {
+async function ResultBody({
+  fixture,
+  selectedId,
+}: {
+  fixture: FixtureKey;
+  selectedId?: string;
+}) {
   const view = resolveFixture(fixture);
 
   if (view.kind === "loading") return <ResultSkeleton />;
@@ -43,7 +49,12 @@ async function ResultBody({ fixture }: { fixture: FixtureKey }) {
 
       <div className="flex flex-col gap-3">
         {view.candidates.map((c) => (
-          <CandidateCard key={c.id} candidate={c} />
+          <CandidateCard
+            key={c.id}
+            candidate={c}
+            fixture={fixture}
+            selected={c.id === selectedId}
+          />
         ))}
       </div>
 
@@ -61,12 +72,20 @@ export default async function ResultsPage({ searchParams }: PageProps<"/results"
   const fixture = isFixtureKey(raw) ? raw : DEFAULT_FIXTURE;
 
   const typed = Array.isArray(sp.q) ? sp.q[0] : sp.q;
+  const rawSelected = Array.isArray(sp.selected) ? sp.selected[0] : sp.selected;
   const view = resolveFixture(fixture);
-  const query =
-    typed?.trim() ||
-    (view.kind === "list" || view.kind === "empty" || view.kind === "fallback"
-      ? view.query
-      : "");
+  const hasQuery =
+    view.kind === "list" || view.kind === "empty" || view.kind === "fallback";
+  // S2·S8 은 질의를 되울리지 않는다. 불러오지 못한 화면에 조건을 적으면 결과처럼 읽힌다
+  const query = hasQuery ? typed?.trim() || view.query : "";
+  const selectedId =
+    view.kind === "list" && view.candidates.some((c) => c.id === rawSelected)
+      ? rawSelected
+      : undefined;
+  const selectedName =
+    view.kind === "list"
+      ? view.candidates.find((c) => c.id === selectedId)?.name
+      : undefined;
 
   return (
     <main className="flex flex-col gap-4 px-4 py-6">
@@ -78,13 +97,21 @@ export default async function ResultsPage({ searchParams }: PageProps<"/results"
           조건 다시 입력
         </Link>
         {/* 조건 없이 눌러도 결과가 나온다 — 그 사실이 화면에 드러나야 한다 (US-2 AC3) */}
-        <h1 className="text-[15px] leading-snug font-semibold">
-          {query || "조건 없이 찾은 결과"}
-        </h1>
+        {hasQuery && (
+          <h1 className="text-[15px] leading-snug font-semibold">
+            {query || "조건 없이 찾은 결과"}
+          </h1>
+        )}
+        {/* 여정의 마지막 칸이 닫혔음을 헤더에도 남긴다 (PRD 분기 02) */}
+        {selectedName && (
+          <p className="text-primary text-xs font-medium">
+            1곳 선택함 · {selectedName}
+          </p>
+        )}
       </header>
 
       <Suspense fallback={<ResultSkeleton />}>
-        <ResultBody fixture={fixture} />
+        <ResultBody fixture={fixture} selectedId={selectedId} />
       </Suspense>
 
       <FixtureSwitcher current={fixture} />

@@ -28,7 +28,7 @@ const OK: Candidate[] = [
       { attribute: "1인석", at: "2026-08-12", by: "매장 등록", stale: false },
       { attribute: "영업시간", at: "2026-07-28", by: "운영자 검증", stale: false },
     ],
-    compare: { price: "1.4만", signature: "국밥", situation: "1인석", verified: "7/28" },
+    compare: { price: "~1.4만", signature: "국밥", situation: "1인석", verified: "7/28" },
   },
   {
     id: "p2",
@@ -40,7 +40,7 @@ const OK: Candidate[] = [
     verifications: [
       { attribute: "1인석", at: "2026-08-20", by: "후기 코멘트", stale: false },
     ],
-    compare: { price: "1.8만", signature: "백반", situation: "조용", verified: "8/20" },
+    compare: { price: "~1.8만", signature: "백반", situation: "조용", verified: "8/20" },
   },
   {
     id: "p3",
@@ -52,7 +52,7 @@ const OK: Candidate[] = [
     verifications: [
       { attribute: "좌석", at: "2026-08-05", by: "자동 수집", stale: false },
     ],
-    compare: { price: "1.9만", signature: "파스타", situation: "콘센트", verified: "8/05" },
+    compare: { price: "~1.9만", signature: "파스타", situation: "콘센트", verified: "8/05" },
   },
 ];
 

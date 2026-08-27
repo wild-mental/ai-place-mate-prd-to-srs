@@ -16,12 +16,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-/** 구조화 조건 4종. 전부 선택이며 기본값이 '상관없음'이다. */
+/** 구조화 조건 5종. 전부 선택이며 기본값이 '상관없음'이다. S7 폴백 필터와 같은 집합이다. */
 const CONDITIONS = [
   { name: "area", label: "지역", options: ["강남역", "역삼", "선릉"] },
   { name: "party", label: "인원", options: ["1명", "2명", "3~4명"] },
   { name: "budget", label: "인당 예산", options: ["1만원 이하", "2만원 이하", "3만원 이하"] },
   { name: "situation", label: "상황", options: ["1인석", "조용", "콘센트"] },
+  // C3(메뉴명 한 번)이 자연어 필드에만 의존하지 않게 한다 (US-2 AC1)
+  { name: "menu", label: "메뉴", options: ["국밥", "백반", "파스타"] },
 ];
 
 export default function ConditionPage() {

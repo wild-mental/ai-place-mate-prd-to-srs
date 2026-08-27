@@ -28,6 +28,13 @@ export function FixtureSwitcher({ current }: { current: FixtureKey }) {
             {FIXTURE_LABEL[k]}
           </Link>
         ))}
+        {/* 선택은 fixture 가 아니라 파라미터다. 상태 목록을 늘리지 않고 확인만 연다 */}
+        <Link
+          href="/results?fixture=ok&selected=p2"
+          className="bg-background text-muted-foreground hover:text-foreground rounded-sm border px-2 py-1 text-[11px]"
+        >
+          선택 상태
+        </Link>
       </div>
     </nav>
   );

@@ -4,6 +4,7 @@
  * 어느 상태에서도 **빈 화면을 만들지 않는다**(SRS §6.3-6).
  * 막다른 상태에는 반드시 다음 행동을 준다. 문구는 명세 §3의 확정 전문을 그대로 쓴다.
  */
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -44,10 +45,11 @@ export function EmptyState({ view }: { view: Extract<ResultView, { kind: "empty"
     <section className="flex flex-col items-start gap-3 rounded-xl border border-dashed px-4 py-8">
       <h2 className="text-[15px] font-semibold">{view.title}</h2>
       <p className="text-empty text-[13px]">{view.body}</p>
+      {/* 다음 행동은 실제로 갈 곳이 있어야 한다. 눌러도 아무 일이 없으면 막다른 화면과 같다 */}
       <div className="mt-1 flex flex-wrap gap-2">
-        {view.actions.map((a) => (
-          <Button key={a} variant="outline" size="sm">
-            {a}
+        {view.actions.map((a, i) => (
+          <Button key={a} asChild variant="outline" size="sm">
+            <Link href={i === 0 ? "/" : "/results?fixture=ok"}>{a}</Link>
           </Button>
         ))}
       </div>
@@ -65,7 +67,7 @@ export function FallbackState({
   view: Extract<ResultView, { kind: "fallback" }>;
 }) {
   return (
-    <section className="flex flex-col gap-4">
+    <form action="/results" method="get" className="flex flex-col gap-4">
       <div className="flex flex-col gap-2 rounded-xl border px-4 py-4">
         <h2 className="text-[15px] font-semibold">{view.title}</h2>
         <p className="text-[13px]">
@@ -96,8 +98,10 @@ export function FallbackState({
         ))}
       </div>
 
-      <Button className="w-full">이 조건으로 다시 찾기</Button>
-    </section>
+      <Button type="submit" className="w-full">
+        이 조건으로 다시 찾기
+      </Button>
+    </form>
   );
 }
 
@@ -107,8 +111,8 @@ export function ErrorState({ view }: { view: Extract<ResultView, { kind: "error"
     <section className="flex flex-col items-start gap-3 rounded-xl border px-4 py-8">
       <h2 className="text-[15px] font-semibold">{view.title}</h2>
       <p className="text-empty text-[13px]">{view.body}</p>
-      <Button variant="outline" size="sm" className="mt-1">
-        {view.action}
+      <Button asChild variant="outline" size="sm" className="mt-1">
+        <Link href="/results?fixture=ok">{view.action}</Link>
       </Button>
     </section>
   );
