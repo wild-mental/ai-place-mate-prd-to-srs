@@ -16,7 +16,11 @@ export const EMPTY: Extract<ResultView, { kind: "empty" }> = {
   query: QUERY,
   title: "조건에 맞는 곳을 못 찾았습니다",
   body: "반경 3km까지 넓혀 찾았습니다.",
-  actions: ["조건 줄이기", "반경 더 넓히기"],
+  actions: [
+    { label: "조건 줄이기", href: "/" },
+    // 넓힌 결과임이 화면에 드러나야 한다 — N2 배너가 붙은 화면으로 보낸다
+    { label: "반경 더 넓히기", href: "/results?fixture=notices" },
+  ],
 };
 
 /** 폴백 화면의 구조화 필터. 필수 입력은 하나도 없다 (US-2 AC3). */

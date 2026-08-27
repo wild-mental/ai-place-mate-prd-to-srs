@@ -90,7 +90,8 @@ export type ResultView =
       query: string;
       title: string;
       body: string;
-      actions: string[];
+      /** 다음 행동. 인덱스로 목적지를 유추하지 않는다 — 항목이 늘면 조용히 어긋난다 */
+      actions: { label: string; href: string }[];
     }
   | {
       kind: "fallback"; // S7

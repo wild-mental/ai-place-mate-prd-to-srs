@@ -47,9 +47,9 @@ export function EmptyState({ view }: { view: Extract<ResultView, { kind: "empty"
       <p className="text-empty text-[13px]">{view.body}</p>
       {/* 다음 행동은 실제로 갈 곳이 있어야 한다. 눌러도 아무 일이 없으면 막다른 화면과 같다 */}
       <div className="mt-1 flex flex-wrap gap-2">
-        {view.actions.map((a, i) => (
-          <Button key={a} asChild variant="outline" size="sm">
-            <Link href={i === 0 ? "/" : "/results?fixture=ok"}>{a}</Link>
+        {view.actions.map((a) => (
+          <Button key={a.label} asChild variant="outline" size="sm">
+            <Link href={a.href}>{a.label}</Link>
           </Button>
         ))}
       </div>
