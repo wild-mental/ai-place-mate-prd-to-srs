@@ -16,7 +16,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           픽스처 기반 프로토타입 · 화면 미확정
         </p>
         {/* 모바일 1폭(390px)만 맞춘다. 데스크톱에서도 같은 폭으로 보인다. */}
-        <div className="bg-background mx-auto min-h-full w-full max-w-[390px] border-x">
+        <div className="bg-background mx-auto min-h-screen w-full max-w-[390px] border-x">
           {children}
         </div>
       </body>

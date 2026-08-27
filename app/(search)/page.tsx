@@ -1,69 +1,98 @@
-import Image from "next/image";
+/**
+ * S1 조건 입력 — UX-003.
+ *
+ * 확인 포인트: **필수 입력 필드 0개**로 검색이 된다 (US-2 AC3 · 입력 단계 ≤ 1회).
+ * 자연어 1줄과 구조화 조건을 한 화면에서 받는다. 조건을 여러 화면에 나눠 받지 않는다.
+ */
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-export default function Home() {
+/** 구조화 조건 4종. 전부 선택이며 기본값이 '상관없음'이다. */
+const CONDITIONS = [
+  { name: "area", label: "지역", options: ["강남역", "역삼", "선릉"] },
+  { name: "party", label: "인원", options: ["1명", "2명", "3~4명"] },
+  { name: "budget", label: "인당 예산", options: ["1만원 이하", "2만원 이하", "3만원 이하"] },
+  { name: "situation", label: "상황", options: ["1인석", "조용", "콘센트"] },
+];
+
+export default function ConditionPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="flex flex-col gap-6 px-4 py-8">
+      <header className="flex flex-col gap-2">
+        <h1 className="text-[22px] leading-snug font-semibold tracking-tight text-balance">
+          조건을 말하면
+          <br />
+          근거가 붙은 세 곳이 옵니다
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          왜 그곳인지 확인 일자까지 함께 보여 드립니다.
+        </p>
+      </header>
+
+      <form action="/results" method="get" className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="q" className="text-sm">
+            조건을 한 줄로 적어 보세요
+          </Label>
+          <Input
+            id="q"
+            name="q"
+            placeholder="예: 혼자 조용히 밥 먹을 곳, 2만원 이하"
+            autoComplete="off"
+          />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+        <fieldset className="flex flex-col gap-3">
+          <legend className="text-muted-foreground mb-1 text-xs">
+            골라도 되고, 안 골라도 됩니다
+          </legend>
+          <div className="grid grid-cols-2 gap-3">
+            {CONDITIONS.map((c) => (
+              <div key={c.name} className="flex flex-col gap-1.5">
+                <Label htmlFor={c.name} className="text-muted-foreground text-xs">
+                  {c.label}
+                </Label>
+                <Select name={c.name}>
+                  <SelectTrigger id={c.name} className="w-full" size="sm">
+                    <SelectValue placeholder="상관없음" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {c.options.map((o) => (
+                      <SelectItem key={o} value={o}>
+                        {o}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ))}
+          </div>
+        </fieldset>
+
+        {/* 필수 입력 0개를 화면으로 증명하는 지점 — 아무것도 채우지 않고 눌러도 결과가 나온다 */}
+        <Button type="submit" className="w-full">
+          근거와 함께 보기
+        </Button>
+        <p className="text-muted-foreground -mt-2 text-center text-xs">
+          아무것도 입력하지 않아도 결과를 받습니다
+        </p>
+      </form>
+
+      <Link
+        href="/results?fixture=ok"
+        className="text-muted-foreground mt-2 text-center text-xs underline underline-offset-4"
+      >
+        화면 상태 8종 둘러보기
+      </Link>
+    </main>
   );
 }

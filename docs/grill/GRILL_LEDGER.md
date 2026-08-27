@@ -9,15 +9,15 @@
 **재개:** `/grill-it` 재호출 → 이 원장을 읽고 **§재개 지점**부터 이어간다. RESOLVED 토픽은 다시 묻지 않는다.
 
 ```
-RESOLVED: 3 / TOTAL: 8
-CORE: 1
-MINOR: 4
+RESOLVED: 7 / TOTAL: 8
+CORE: 3
+MINOR: 8
 - [x] T1 | CORE  | 확인할 화면 상태 목록 | status:RESOLVED | decision:상태 8종 유지 + 고지 배너 3종(N1·N2·N3)을 결과 화면 요소로 추가 · 동시 노출 프리셋 1개 | applied:[Spec]Prototype-Visual-Plan.md §1 신규 · prototype-suggestion-local.md §4·§8 · skill 401-prototype-visual-rules 신규 · CLAUDE.md 라우팅
 - [x] T2 | CORE  | 후보 카드 정보 구조 | status:RESOLVED | decision:카드 3장(슬롯 5개 순서 고정) + 하단 비교표(축 4개·값 5자 축약·가로스크롤 금지) · 확인 주체 4종 · 용어 '후기 코멘트' 고정 | applied:[Spec]…§2 · skill 401 §카드·비교표·용어
 - [ ] T3 | CORE  | 카피 규약 — 판정형 배제 하의 선정 이유 문장 틀과 빈·오류 문구 톤 | depends:T2      | status:UNRESOLVED
 - [x] T4 | CORE  | 디자인 토큰 실제 값 | status:RESOLVED | decision:딥 틸 primary oklch(0.47 0.072 197) · 라이트 전용 · next/font 제거하고 시스템 한글 스택 | applied:app/globals.css UX-001 토큰 블록 · app/layout.tsx
 - [x] T5 | MINOR | shadcn 컴포넌트 인벤토리 | status:RESOLVED | decision:10종 설치 — button input card badge alert skeleton select separator table label | applied:components.json · src/components/ui/
-- [ ] T6 | CORE  | 픽스처 데이터의 실체 — 상권 · 메뉴 · 가격대 · 합성 규칙 | depends:T1,T2   | status:UNRESOLVED
+- [x] T6 | CORE  | 픽스처 데이터의 실체 | status:RESOLVED | decision:강남역 1km · 합성 매장 3곳 · 확인 이력을 속성 단위로 두어 카드 3장에 확인 주체 4종이 다 보이게 | applied:[Spec]…§6 · src/mocks/top3.ts
 - [ ] T7 | MINOR | 확인 도구 — 상태 스위처 UI와 모바일 390px 뷰포트 표현 | depends:T1      | status:UNRESOLVED
 - [ ] T8 | MINOR | 산출물 문서의 명세 수준 — 에이전트가 지어내지 않고 실행할 상세도 | depends:T1~T7   | status:UNRESOLVED
 ```
@@ -152,3 +152,28 @@ S8 오류
 | M2 | `src/lib/utils.ts` 허용 | shadcn의 `cn()` 헬퍼다. SRS §14.1의 `lib/{db,ai,cache,realtime,observability}.ts` 와 이름이 겹치지 않는다 |
 | M3 | 390px 프레임 = `max-w-[390px] mx-auto border-x` | 데스크톱에서도 모바일 폭 그대로 보이게 한다 (T7 일부 선결) |
 | M4 | 최상단 '픽스처 기반 · 화면 미확정' 표기 | R5 완화. 고지 배너와 혼동되지 않게 콘텐츠 밖에 둔다 |
+
+### T3 — 카피 규약 (CORE · RESOLVED · 자율 결정)
+
+**선정 이유 1줄의 문장 틀을 고정했다** — `<속성 나열> — 조건 N개 중 M개 충족`.
+판정어를 넣을 자리가 없게 만든 틀이다. 서술형으로 두면 '편한' '좋은' 같은 판정어가 스며들고, 픽스처 12장을 에이전트가 각각 작문하면서 톤이 흔들린다.
+**미충족 개수를 숨기지 않는다** — `3개 중 2개 충족`을 그대로 쓴다. 감추면 방문 후 불일치(현행 35%)로 돌아온다.
+
+**상태·배너 문구는 전문을 명세에 박았다.** 지금 15분 더 쓰고 구현에서 반나절 아낀다. 쓰지 않는 표현도 함께 적었다 — `오류가 발생했습니다`(책임 모호) · `잘못된 입력입니다`(사용자 탓) · `검색 결과가 없습니다`(다음 행동 없음).
+
+### T6 — 픽스처 데이터의 실체 (CORE · RESOLVED · 자율 결정)
+
+강남역 반경 1km · 합성 매장 3곳. **확인 이력을 속성 단위로 둔 것이 이 결정의 핵심이다.**
+US-3 AC2가 "어떤 속성이 90일 이상 갱신되지 않았고"라고 쓰므로 확인은 카드가 아니라 속성에 붙는다. 그 덕에 카드 3장으로 **확인 주체 4종이 한 화면에 다 보인다** — 카드당 1건이면 3종이 한계였다.
+
+### T7 — 확인 도구 (MINOR · RESOLVED · 자율 결정)
+
+스위처는 결과 하단 별도 영역에 회색으로 낮춰 둔다. 라벨에 상태 번호(`S3 정상`)를 붙여 명세 §1.1과 눈으로 대조한다. 알 수 없는 `fixture` 값은 `ok` 로 떨어뜨려 빈 화면을 만들지 않는다.
+
+### 부수 결정 추가 (MINOR)
+
+| # | 결정 | 왜 |
+| --- | --- | --- |
+| M5 | `devIndicators: false` | dev 오버레이가 스크린샷을 가린다. 평가 대상이 화면이다 |
+| M6 | shadcn `Alert` 의 `grid-cols` 오버라이드 금지 | `grid-cols-[0_1fr]` 로 덮었더니 텍스트 열이 0폭이 되어 배너가 **세로 한 글자씩** 깨졌다. 기본 클래스를 건드리지 않는다 |
+| M7 | Playwright 브라우저는 **기존 캐시를 쓴다** | `~/Library/Caches/ms-playwright/chromium-1105` 가 이미 있다. `playwright@1.42.1` 로 버전을 맞춰 새로 내려받지 않는다 |

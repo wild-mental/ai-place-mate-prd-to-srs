@@ -96,3 +96,13 @@ C-TEC-002가 진입점을 셋으로 제한한다. **취향이 아니라 표로 �
 | `docs/tasks/<TASK-ID>.md` | 태스크별 AC · DoD · 실패 시나리오 |
 | `.agents/rules/` | 상세 규칙 3종 |
 | `.agents/skills/` | 상황별 스킬 (SSOT · 각 도구에 심볼릭 링크) |
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
